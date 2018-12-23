@@ -23,7 +23,7 @@ from .oauth import OAuthRemoteAppWithRefresh
 from urllib.parse import urljoin
 
 from .mock import query_mock_cluster
-from .kubernetes import query_kubernetes_cluster
+from .cluster_query import query_kubernetes_cluster
 from .stores import MemoryStore, RedisStore
 from .cluster_discovery import DEFAULT_CLUSTERS, StaticClusterDiscoverer, ClusterRegistryDiscoverer, KubeconfigDiscoverer, MockDiscoverer
 from .update import update_clusters
