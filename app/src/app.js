@@ -370,7 +370,7 @@ export default class App {
             this.draw()
             this.update()
         })
-        resetButton.x = 560
+        resetButton.x = 570
         resetButton.y = 3
         menuBar.addChild(resetButton.draw())
     }
@@ -518,7 +518,7 @@ export default class App {
                 const status = this.clusterStatuses.get(cluster.id)
                 let clusterBox = clusterComponentById[cluster.id]
                 if (!clusterBox) {
-                    clusterBox = new Cluster(cluster, status, this.tooltip)
+                    clusterBox = new Cluster(cluster, status, this.tooltip, this.zoomInto.bind(this))
                     this.viewContainer.addChild(clusterBox)
                 } else {
                     clusterBox.cluster = cluster
@@ -542,12 +542,6 @@ export default class App {
             if (!this.seenPods.has(key)) {
                 // pod was created
                 this.seenPods.add(key)
-                // zoom into the pod when clicked
-                pod.on('mousedown', (event) => {
-                    if (event.data.button === 1) {
-                        this.zoomInto(pod, 32)
-                    }
-                })
                 if (!this.bootstrapping && changes < 10) {
                     const globalPos = pod.toGlobal({x: 0, y: 0})
                     window.setTimeout(function () {

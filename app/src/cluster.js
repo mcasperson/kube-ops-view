@@ -3,12 +3,24 @@ import { Pod } from './pod.js'
 import App from './app.js'
 const PIXI = require('pixi.js')
 
+const CLUSTER_ZOOM = 1
+const NODE_ZOOM = 4
+
 export default class Cluster extends PIXI.Graphics {
-    constructor (cluster, status, tooltip) {
+    constructor (cluster, status, tooltip, zoomInto) {
         super()
         this.cluster = cluster
         this.status = status
         this.tooltip = tooltip
+        this.zoomInto = zoomInto
+        this.interactive = true
+        const that = this
+        this.on('mousedown', function (event) {
+            if (event.data.button === 1) {
+                zoomInto(that, CLUSTER_ZOOM)
+                event.stopPropagation()
+            }
+        })
     }
 
     destroy() {
@@ -26,6 +38,7 @@ export default class Cluster extends PIXI.Graphics {
     draw () {
         this.removeChildren()
         this.clear()
+        const that = this
         const left = 10
         const top = 20
         const padding = 5
@@ -42,7 +55,15 @@ export default class Cluster extends PIXI.Graphics {
         for (const nodeName of Object.keys(this.cluster.nodes).sort()) {
             const node = this.cluster.nodes[nodeName]
             var nodeBox = new Node(node, this, this.tooltip)
+            nodeBox.interactive = true
             nodeBox.draw()
+            nodeBox.on('mousedown', function(event) {
+                if (event.data.button === 1) {
+                    that.zoomInto(this, NODE_ZOOM)
+                    event.stopPropagation()
+                }
+            })
+
             if (nodeBox.isMaster()) {
                 if (masterX > maxWidth) {
                     masterWidth = masterX
@@ -99,9 +120,11 @@ export default class Cluster extends PIXI.Graphics {
         topHandle.endFill()
         topHandle.interactive = true
         topHandle.buttonMode = true
-        const that = this
-        topHandle.on('click', function(_event) {
-            App.current.toggleCluster(that.cluster.id)
+        topHandle.on('click', function(event) {
+            if (event.data.button === 0) {
+                App.current.toggleCluster(that.cluster.id)
+                event.stopPropagation()
+            }
         })
         const text = new PIXI.Text(this.cluster.api_server_url, {fontFamily: 'ShareTechMono', fontSize: 10, fill: 0x000000})
         text.x = 2
@@ -126,6 +149,9 @@ export default class Cluster extends PIXI.Graphics {
             this.alpha = 1
             this.tint = 0xffffff
         }
+
+        // Allow the empty space between nodes to be clicked
+        this.hitArea = new PIXI.Rectangle(0, 0, this.width, this.height)
     }
 
 }
