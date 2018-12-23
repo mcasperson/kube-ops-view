@@ -370,7 +370,7 @@ export default class App {
             this.draw()
             this.update()
         })
-        resetButton.x = 575
+        resetButton.x = 560
         resetButton.y = 3
         menuBar.addChild(resetButton.draw())
     }
@@ -542,6 +542,8 @@ export default class App {
             if (!this.seenPods.has(key)) {
                 // pod was created
                 this.seenPods.add(key)
+                // zoom into the pod when clicked
+                pod.on('mousedown', () => this.zoomInto(pod, 32))
                 if (!this.bootstrapping && changes < 10) {
                     const globalPos = pod.toGlobal({x: 0, y: 0})
                     window.setTimeout(function () {
@@ -551,6 +553,19 @@ export default class App {
                 changes++
             }
         }
+    }
+
+    zoomInto(element, zoom) {
+        this.viewContainer.scale.set(zoom)
+
+        const offsetx = window.innerWidth / 2 - (element.getGlobalPosition().x + (element.width / 2 * this.viewContainer.scale.x))
+        const offsety = window.innerHeight / 2 - (element.getGlobalPosition().y + (element.height / 2 * this.viewContainer.scale.y))
+
+        this.viewContainer.x += offsetx
+        this.viewContainer.y += offsety
+        // stop any current move animation
+        this.viewContainerTargetPosition.x = this.viewContainer.x
+        this.viewContainerTargetPosition.y = this.viewContainer.y
     }
 
     tick(time) {
