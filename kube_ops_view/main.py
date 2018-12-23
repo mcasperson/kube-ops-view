@@ -74,6 +74,8 @@ def index():
     static_build_path = Path(__file__).parent / 'static' / 'build'
     candidates = sorted(static_build_path.glob('app*.js'))
     if candidates:
+        # npm start will produce a file called app.js, which includes the source map and is useful
+        # for debugging. app.js is at the end of the list of files.
         app_js = candidates[len(candidates) - 1].name
         if app.debug:
             # cache busting for local development
