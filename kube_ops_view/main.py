@@ -74,7 +74,7 @@ def index():
     static_build_path = Path(__file__).parent / 'static' / 'build'
     candidates = sorted(static_build_path.glob('app*.js'))
     if candidates:
-        app_js = candidates[0].name
+        app_js = candidates[len(candidates) - 1].name
         if app.debug:
             # cache busting for local development
             app_js += '?_={}'.format(time.time())

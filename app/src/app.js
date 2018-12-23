@@ -6,6 +6,7 @@ import {Theme, ALL_THEMES} from './themes.js'
 import {DESATURATION_FILTER} from './filters.js'
 import {JSON_delta} from './vendor/json_delta.js'
 import Config from './config.js'
+import Button from './button'
 
 const PIXI = require('pixi.js')
 
@@ -284,6 +285,14 @@ export default class App {
     }
 
     drawMenuBar() {
+        const menuBar = this.createMenuBar()
+        this.drawResetButton(menuBar)
+        this.drawSearch()
+        this.drawSort(menuBar)
+        this.drawTheme(menuBar)
+    }
+
+    createMenuBar() {
         const menuBar = new PIXI.Graphics()
         menuBar.beginFill(this.theme.secondaryColor, 1)
         menuBar.drawRect(0, 0, this.renderer.width, 28)
@@ -293,25 +302,23 @@ export default class App {
         menuBar.lineStyle(1, this.theme.primaryColor, 1)
         menuBar.drawRect(20, 3, 200, 22)
         this.stage.addChild(menuBar)
+        return menuBar
+    }
 
-        const searchPrompt = new PIXI.Text('>', {
-            fontFamily: 'ShareTechMono',
-            fontSize: 14,
-            fill: this.theme.primaryColor
+    drawTheme(menuBar) {
+        const themeOptions = Object.keys(ALL_THEMES).sort().map(name => {
+            return {text: name.toUpperCase(), value: name}
         })
-        searchPrompt.x = 26
-        searchPrompt.y = 8
-        PIXI.ticker.shared.add(function (_) {
-            var v = Math.sin((PIXI.ticker.shared.lastTime % 2000) / 2000. * Math.PI)
-            searchPrompt.alpha = v
+        const app = this
+        const themeSelector = new SelectBox(themeOptions, this.theme.name, function (value) {
+            app.switchTheme(value)
         })
-        this.stage.addChild(searchPrompt)
+        themeSelector.x = 420
+        themeSelector.y = 3
+        menuBar.addChild(themeSelector.draw())
+    }
 
-        const searchText = new PIXI.Text('', {fontFamily: 'ShareTechMono', fontSize: 14, fill: this.theme.primaryColor})
-        searchText.x = 40
-        searchText.y = 8
-        this.stage.addChild(searchText)
-
+    drawSort(menuBar) {
         const items = [
             {
                 text: 'SORT: NAME', value: sortByName
@@ -335,18 +342,37 @@ export default class App {
         selectBox.x = 265
         selectBox.y = 3
         menuBar.addChild(selectBox.draw())
+    }
 
-        const themeOptions = Object.keys(ALL_THEMES).sort().map(name => {
-            return {text: name.toUpperCase(), value: name}
+    drawSearch() {
+        const searchPrompt = new PIXI.Text('>', {
+            fontFamily: 'ShareTechMono',
+            fontSize: 14,
+            fill: this.theme.primaryColor
         })
-        const themeSelector = new SelectBox(themeOptions, this.theme.name, function (value) {
-            app.switchTheme(value)
+        searchPrompt.x = 26
+        searchPrompt.y = 8
+        PIXI.ticker.shared.add(function (_) {
+            var v = Math.sin((PIXI.ticker.shared.lastTime % 2000) / 2000. * Math.PI)
+            searchPrompt.alpha = v
         })
-        themeSelector.x = 420
-        themeSelector.y = 3
-        menuBar.addChild(themeSelector.draw())
+        this.stage.addChild(searchPrompt)
 
+        const searchText = new PIXI.Text('', {fontFamily: 'ShareTechMono', fontSize: 14, fill: this.theme.primaryColor})
+        searchText.x = 40
+        searchText.y = 8
+        this.stage.addChild(searchText)
         this.searchText = searchText
+    }
+
+    drawResetButton(menuBar) {
+        const resetButton = new Button('RESET', () => {
+            this.draw()
+            this.update()
+        })
+        resetButton.x = 575
+        resetButton.y = 3
+        menuBar.addChild(resetButton.draw())
     }
 
     draw() {
