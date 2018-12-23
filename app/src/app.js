@@ -181,7 +181,7 @@ export default class App {
             prevX, prevY
 
         function mouseDownHandler(event) {
-            if (event.button == 0 || event.button == 1) {
+            if (event.button == 0) {
                 prevX = event.clientX
                 prevY = event.clientY
                 isDragging = true
@@ -543,7 +543,11 @@ export default class App {
                 // pod was created
                 this.seenPods.add(key)
                 // zoom into the pod when clicked
-                pod.on('mousedown', () => this.zoomInto(pod, 32))
+                pod.on('mousedown', (event) => {
+                    if (event.data.button === 1) {
+                        this.zoomInto(pod, 32)
+                    }
+                })
                 if (!this.bootstrapping && changes < 10) {
                     const globalPos = pod.toGlobal({x: 0, y: 0})
                     window.setTimeout(function () {
