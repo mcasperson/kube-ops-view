@@ -7,7 +7,7 @@ import {DESATURATION_FILTER} from './filters.js'
 import {JSON_delta} from './vendor/json_delta.js'
 import Config from './config.js'
 import Button from './button'
-import Menu, {MENU_HORIZONTAL_PADDING} from './menu'
+import Menu from './menu'
 import {copyStringToClipboard} from './utils'
 
 const PIXI = require('pixi.js')
@@ -423,22 +423,54 @@ export default class App {
     }
 
     buildPodMenu() {
+        const that = this
         const getMenu = new Menu([
             new Button('Get Pod', function (event) {
                 copyStringToClipboard('kubectl get pod ' + Pod.selected.name + ' -n ' + Pod.selected.namespace)
                 event.stopPropagation()
+                that.clearMenus()
             })
         ])
 
         const describeMenu = new Menu([
             new Button('Describe Pod', function (event) {
+                copyStringToClipboard('kubectl describe pod ' + Pod.selected.name + ' -n ' + Pod.selected.namespace)
                 event.stopPropagation()
+                that.clearMenus()
+            })
+        ])
+
+        const logsMenu = new Menu([
+            new Button('Pod Logs', function (event) {
+                copyStringToClipboard('kubectl logs ' + Pod.selected.name + ' -n ' + Pod.selected.namespace)
+                event.stopPropagation()
+                that.clearMenus()
+            }),
+            new Button('Pod Logs Following', function (event) {
+                copyStringToClipboard('kubectl logs ' + Pod.selected.name + ' -n ' + Pod.selected.namespace + ' -f')
+                event.stopPropagation()
+                that.clearMenus()
+            }),
+            new Button('Pod Logs Previous', function (event) {
+                copyStringToClipboard('kubectl logs --previous ' + Pod.selected.name + ' -n ' + Pod.selected.namespace)
+                event.stopPropagation()
+                that.clearMenus()
+            })
+        ])
+
+        const deleteMenu = new Menu([
+            new Button('Delete Pod', function (event) {
+                copyStringToClipboard('kubectl delete pod ' + Pod.selected.name + ' -n ' + Pod.selected.namespace)
+                event.stopPropagation()
+                that.clearMenus()
             })
         ])
 
         const menus = [
             getMenu,
-            describeMenu
+            describeMenu,
+            logsMenu,
+            deleteMenu
         ]
 
         menus.forEach(menu => {
@@ -464,9 +496,11 @@ export default class App {
                 event.stopPropagation()
             }),
             new Button('Logs >', function (event) {
+                showMenu(logsMenu, this.getGlobalPosition().y)
                 event.stopPropagation()
             }),
             new Button('Delete >', function (event) {
+                showMenu(deleteMenu, this.getGlobalPosition().y)
                 event.stopPropagation()
             })
         ])
