@@ -14,7 +14,6 @@ const PIXI = require('pixi.js')
 
 const addWheelListener = require('./vendor/addWheelListener')
 
-
 export default class App {
 
     constructor() {
@@ -839,5 +838,3 @@ export default class App {
         PIXI.ticker.shared.add(this.tick, this)
     }
 }
-
-module.exports = App
