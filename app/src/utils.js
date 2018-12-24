@@ -69,6 +69,23 @@ function parseResource(v) {
     return parseInt(match[1]) * factor
 }
 
+function copyStringToClipboard (str) {
+    // Create new element
+    const el = document.createElement('textarea')
+    // Set value (string to be copied)
+    el.value = str
+    // Set non-editable to avoid focus and move outside of view
+    el.setAttribute('readonly', '')
+    el.style = {position: 'absolute', left: '-9999px'}
+    document.body.appendChild(el)
+    // Select text inside element
+    el.select()
+    // Copy text to clipboard
+    document.execCommand('copy')
+    // Remove temporary element
+    document.body.removeChild(el)
+}
+
 const metric = (metric, type) =>
     metric ? (metric[type] ? parseResource(metric[type]) : 0) : 0
 
@@ -77,4 +94,4 @@ const podResource = type => (containers, resource) =>
         .map(({resources}) => resources ? metric(resources[resource], type) : 0)
         .reduce((a, b) => a + b, 0)
 
-export {FACTORS, hsvToRgb, getBarColor, parseResource, metric, podResource}
+export {FACTORS, hsvToRgb, getBarColor, parseResource, metric, podResource, copyStringToClipboard}

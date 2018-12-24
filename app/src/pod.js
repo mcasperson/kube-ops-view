@@ -56,8 +56,6 @@ export class Pod extends PIXI.Graphics {
         }
     }
 
-
-
     destroy() {
         if (this.tick) {
             PIXI.ticker.shared.remove(this.tick, this)
@@ -305,6 +303,7 @@ export class Pod extends PIXI.Graphics {
 
     podMenu() {
         this.on('rightdown', function(event) {
+            Pod.selected = this.pod
             this.menu.x = this.getGlobalPosition().x + this.getBounds().width + MENU_HORIZONTAL_PADDING
             this.menu.y = this.getGlobalPosition().y
             this.menu.visible = true

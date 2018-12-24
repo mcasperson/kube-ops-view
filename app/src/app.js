@@ -8,6 +8,7 @@ import {JSON_delta} from './vendor/json_delta.js'
 import Config from './config.js'
 import Button from './button'
 import Menu, {MENU_HORIZONTAL_PADDING} from './menu'
+import {copyStringToClipboard} from './utils'
 
 const PIXI = require('pixi.js')
 
@@ -424,6 +425,7 @@ export default class App {
     buildPodMenu() {
         const getMenu = new Menu([
             new Button('Get Pod', function (event) {
+                copyStringToClipboard('kubectl get pod ' + Pod.selected.name + ' -n ' + Pod.selected.namespace)
                 event.stopPropagation()
             })
         ])
