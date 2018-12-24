@@ -5,11 +5,12 @@ import App from './app'
 const PIXI = require('pixi.js')
 
 export default class Node extends PIXI.Graphics {
-    constructor(node, cluster, tooltip) {
+    constructor(node, cluster, tooltip, menu) {
         super()
         this.node = node
         this.cluster = cluster
         this.tooltip = tooltip
+        this.menu = menu
     }
 
     isMaster() {
@@ -108,7 +109,7 @@ export default class Node extends PIXI.Graphics {
         const pods = Object.values(this.node.pods).sort(sorterFn)
         for (const pod of pods) {
             if (pod.namespace != 'kube-system') {
-                const podBox = Pod.getOrCreate(pod, this.cluster, this.tooltip)
+                const podBox = Pod.getOrCreate(pod, this.cluster, this.tooltip, this.menu)
                 podBox.movePodTo(new PIXI.Point(px, py))
                 nodeBox.addChild(podBox.draw())
                 px += 13
@@ -122,7 +123,7 @@ export default class Node extends PIXI.Graphics {
         py = 100
         for (const pod of pods) {
             if (pod.namespace == 'kube-system') {
-                const podBox = Pod.getOrCreate(pod, this.cluster, this.tooltip)
+                const podBox = Pod.getOrCreate(pod, this.cluster, this.tooltip, this.menu)
                 podBox.movePodTo(new PIXI.Point(px, py))
                 nodeBox.addChild(podBox.draw())
                 px += 13

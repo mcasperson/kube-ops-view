@@ -20,7 +20,7 @@ export default class Button extends PIXI.Graphics
             fill: App.current.theme.primaryColor,
             align: 'center'
         })
-        this.text.x = 10
+        this.text.x = 5
         this.text.y = 5
         this.addChild(this.text)
     }
@@ -37,11 +37,11 @@ export default class Button extends PIXI.Graphics
         const button = this
 
         // FIXME: hardcoded value for average char width..
-        const textBoxWidth = 10 + 8 * this.value.length
+        const textBoxWidth = 7 + 8 * this.value.length
 
         // draw a triangle
         button.lineStyle(1, App.current.theme.primaryColor, 1)
-        button.drawRect(4, 0, textBoxWidth, 22)
+        button.drawRect(0, 0, textBoxWidth, 22)
 
         button.on('mousedown', button.onClick.bind(this))
         button.on('touchstart', button.onClick.bind(this))

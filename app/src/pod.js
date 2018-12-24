@@ -1,7 +1,10 @@
+import Menu, {MENU_HORIZONTAL_PADDING} from './menu'
+
 const PIXI = require('pixi.js')
 import App from './app.js'
 import {FACTORS, getBarColor, podResource} from './utils.js'
 import {BRIGHTNESS_FILTER} from './filters.js'
+import Button from './button'
 
 const ALL_PODS = {}
 
@@ -38,8 +41,9 @@ export {ALL_PODS, sortByAge, sortByCPU, sortByMemory, sortByName}
 
 export class Pod extends PIXI.Graphics {
 
-    constructor(pod, cluster, tooltip) {
+    constructor(pod, cluster, tooltip, menu) {
         super()
+        this.menu = menu
         this.pod = pod
         this.cluster = cluster
         this.tooltip = tooltip
@@ -51,6 +55,8 @@ export class Pod extends PIXI.Graphics {
             ALL_PODS[cluster.cluster.id + '/' + pod.namespace + '/' + pod.name] = this
         }
     }
+
+
 
     destroy() {
         if (this.tick) {
@@ -114,14 +120,14 @@ export class Pod extends PIXI.Graphics {
         }
     }
 
-    static getOrCreate(pod, cluster, tooltip) {
+    static getOrCreate(pod, cluster, tooltip, menu) {
         const existingPod = ALL_PODS[cluster.cluster.id + '/' + pod.namespace + '/' + pod.name]
         if (existingPod) {
             existingPod.pod = pod
             existingPod.clear()
             return existingPod
         } else {
-            return new Pod(pod, cluster, tooltip)
+            return new Pod(pod, cluster, tooltip, menu)
         }
     }
 
@@ -162,6 +168,9 @@ export class Pod extends PIXI.Graphics {
 
         const podBox = this
         podBox.interactive = true
+
+        this.podMenu()
+
         podBox.on('mouseover', function () {
             podBox.filters = podBox.filters.filter(x => x != BRIGHTNESS_FILTER).concat([BRIGHTNESS_FILTER])
             let s = this.pod.name
@@ -292,5 +301,14 @@ export class Pod extends PIXI.Graphics {
         podBox.endFill()
 
         return this
+    }
+
+    podMenu() {
+        this.on('rightdown', function(event) {
+            this.menu.x = this.getGlobalPosition().x + this.getBounds().width + MENU_HORIZONTAL_PADDING
+            this.menu.y = this.getGlobalPosition().y
+            this.menu.visible = true
+            event.stopPropagation()
+        })
     }
 }

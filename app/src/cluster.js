@@ -7,11 +7,12 @@ const CLUSTER_ZOOM = 1
 const NODE_ZOOM = 4
 
 export default class Cluster extends PIXI.Graphics {
-    constructor (cluster, status, tooltip, zoomInto) {
+    constructor (cluster, status, tooltip, menu, zoomInto) {
         super()
         this.cluster = cluster
         this.status = status
         this.tooltip = tooltip
+        this.menu = menu
         this.zoomInto = zoomInto
         this.interactive = true
         const that = this
@@ -54,7 +55,7 @@ export default class Cluster extends PIXI.Graphics {
         const maxWidth = window.innerWidth - 130
         for (const nodeName of Object.keys(this.cluster.nodes).sort()) {
             const node = this.cluster.nodes[nodeName]
-            var nodeBox = new Node(node, this, this.tooltip)
+            var nodeBox = new Node(node, this, this.tooltip, this.menu)
             nodeBox.interactive = true
             nodeBox.draw()
             nodeBox.on('mousedown', function(event) {
@@ -100,7 +101,7 @@ export default class Cluster extends PIXI.Graphics {
 
 
         for (const pod of Object.values(this.cluster.unassigned_pods)) {
-            var podBox = Pod.getOrCreate(pod, this, this.tooltip)
+            var podBox = Pod.getOrCreate(pod, this, this.tooltip, this.menu)
             podBox.x = masterX
             podBox.y = masterY
             podBox.draw()

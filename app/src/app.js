@@ -7,6 +7,7 @@ import {DESATURATION_FILTER} from './filters.js'
 import {JSON_delta} from './vendor/json_delta.js'
 import Config from './config.js'
 import Button from './button'
+import Menu, {MENU_HORIZONTAL_PADDING} from './menu'
 
 const PIXI = require('pixi.js')
 
@@ -133,6 +134,11 @@ export default class App {
         this.registerEventListeners()
         setInterval(this.pruneUnavailableClusters.bind(this), 5 * 1000)
 
+        // prevent the context menu
+        window.addEventListener('contextmenu', (e) => {
+            e.preventDefault()
+        })
+
         if (this.config.reloadIntervalSeconds) {
             setTimeout(function () {
                 location.reload(false)
@@ -203,6 +209,8 @@ export default class App {
             this.viewContainerTargetPosition.y = this.viewContainer.y
             prevX = event.clientX
             prevY = event.clientY
+
+            this.clearMenus()
         }
 
         function mouseUpHandler(_event) {
@@ -235,6 +243,8 @@ export default class App {
                 this.viewContainerTargetPosition.y = this.viewContainer.y
                 prevX = touch.clientX
                 prevY = touch.clientY
+
+                this.clearMenus()
             }
         }
 
@@ -277,11 +287,21 @@ export default class App {
             // stop any current move animation
             that.viewContainerTargetPosition.x = that.viewContainer.x
             that.viewContainerTargetPosition.y = that.viewContainer.y
+
+            that.clearMenus()
         }
 
         addWheelListener(this.renderer.view, function (e) {
             zoom(e.clientX, e.clientY, e.deltaY < 0)
         })
+    }
+
+    /**
+     * Hide any context menus when we start zooming or panning
+     */
+    clearMenus() {
+        this.menu.visible = false
+        this.menus.forEach(menu => menu.visible = false)
     }
 
     drawMenuBar() {
@@ -397,10 +417,66 @@ export default class App {
 
         this.viewContainer = viewContainer
         this.tooltip = tooltip
+
+        this.buildPodMenu()
+    }
+
+    buildPodMenu() {
+        const getMenu = new Menu([
+            new Button('Get Pod', function (event) {
+                event.stopPropagation()
+            })
+        ])
+
+        const describeMenu = new Menu([
+            new Button('Describe Pod', function (event) {
+                event.stopPropagation()
+            })
+        ])
+
+        const menus = [
+            getMenu,
+            describeMenu
+        ]
+
+        menus.forEach(menu => {
+            menu.draw()
+            menu.visible = false
+            this.stage.addChild(menu)
+        })
+
+        function showMenu(showMenu, y) {
+            menus.forEach(menu => menu.visible = false)
+            showMenu.x = menu.x + menu.width
+            showMenu.y = y
+            showMenu.visible = true
+        }
+
+        const menu = new Menu([
+            new Button('Get >', function (event) {
+                showMenu(getMenu, this.getGlobalPosition().y)
+                event.stopPropagation()
+            }),
+            new Button('Describe >', function (event) {
+                showMenu(describeMenu, this.getGlobalPosition().y)
+                event.stopPropagation()
+            }),
+            new Button('Logs >', function (event) {
+                event.stopPropagation()
+            }),
+            new Button('Delete >', function (event) {
+                event.stopPropagation()
+            })
+        ])
+        menu.draw()
+        menu.visible = false
+        this.stage.addChild(menu)
+        this.menu = menu
+        this.menus = menus
     }
 
     animatePodCreation(originalPod, globalPosition) {
-        const pod = new Pod(originalPod.pod, null, this.tooltip)
+        const pod = new Pod(originalPod.pod, null, this.tooltip, this.menu)
         pod.draw()
         pod.blendMode = PIXI.BLEND_MODES.ADD
         pod.interactive = false
@@ -441,7 +517,7 @@ export default class App {
     }
 
     animatePodDeletion(originalPod, globalPosition) {
-        const pod = new Pod(originalPod.pod, null, this.tooltip)
+        const pod = new Pod(originalPod.pod, null, this.tooltip, this.menu)
         pod.draw()
         pod.blendMode = PIXI.BLEND_MODES.ADD
         const globalCenter = new PIXI.Point(globalPosition.x + pod.width / 2, globalPosition.y + pod.height / 2)
@@ -518,7 +594,7 @@ export default class App {
                 const status = this.clusterStatuses.get(cluster.id)
                 let clusterBox = clusterComponentById[cluster.id]
                 if (!clusterBox) {
-                    clusterBox = new Cluster(cluster, status, this.tooltip, this.zoomInto.bind(this))
+                    clusterBox = new Cluster(cluster, status, this.tooltip, this.menu, this.zoomInto.bind(this))
                     this.viewContainer.addChild(clusterBox)
                 } else {
                     clusterBox.cluster = cluster
