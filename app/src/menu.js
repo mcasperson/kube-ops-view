@@ -13,6 +13,8 @@ export default class Menu extends PIXI.Graphics {
     }
 
     draw() {
+        this.removeChildren()
+        this.clear()
         this.items.reduce((verticalPos, item) => {
             const element = item.draw()
             this.addChild(element)
@@ -26,7 +28,7 @@ export default class Menu extends PIXI.Graphics {
     }
 
     destroy() {
-        super.destroy()
         this.removeChildren()
+        super.destroy()
     }
 }
