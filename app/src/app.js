@@ -400,6 +400,17 @@ export default class App {
         this.stage.removeChildren()
         this.theme.apply(this.stage)
 
+        this.buildViewContainer()
+
+        if (!this.config.dashboardMode) {
+            this.drawMenuBar()
+        }
+
+        this.buildTooltip()
+        this.buildPodMenu()
+    }
+
+    buildViewContainer() {
         const viewContainer = this.viewContainer || new PIXI.Container()
         viewContainer.scale.set(this.config.initialScale)
         viewContainer.x = 20
@@ -407,19 +418,14 @@ export default class App {
         this.viewContainerTargetPosition.x = viewContainer.x
         this.viewContainerTargetPosition.y = viewContainer.y
         this.stage.addChild(viewContainer)
+        this.viewContainer = viewContainer
+    }
 
-        if (!this.config.dashboardMode) {
-            this.drawMenuBar()
-        }
-
+    buildTooltip() {
         const tooltip = this.tooltip || new Tooltip()
         tooltip.draw()
         this.stage.addChild(tooltip)
-
-        this.viewContainer = viewContainer
         this.tooltip = tooltip
-
-        this.buildPodMenu()
     }
 
     buildPodMenu() {
