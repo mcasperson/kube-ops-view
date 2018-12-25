@@ -2,6 +2,7 @@ import {Pod} from './pod.js'
 import Bars from './bars.js'
 import {parseResource} from './utils.js'
 import App from './app'
+
 const PIXI = require('pixi.js')
 
 export default class Node extends PIXI.Graphics {

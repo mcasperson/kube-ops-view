@@ -1,6 +1,7 @@
 import Node from './node.js'
-import { Pod } from './pod.js'
+import {Pod} from './pod.js'
 import App from './app.js'
+
 const PIXI = require('pixi.js')
 
 const CLUSTER_ZOOM = 1

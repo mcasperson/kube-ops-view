@@ -1,4 +1,3 @@
-import Button from './button'
 import App from './app'
 
 const PIXI = require('pixi.js')
