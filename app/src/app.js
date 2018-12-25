@@ -14,6 +14,7 @@ const PIXI = require('pixi.js')
 
 const addWheelListener = require('./vendor/addWheelListener')
 
+
 export default class App {
 
     constructor() {
@@ -388,7 +389,7 @@ export default class App {
     drawResetButton(menuBar) {
         const resetButton = new Button('RESET', () => {
             this.draw()
-            this.update()
+            //this.update()
         })
         resetButton.x = 570
         resetButton.y = 3
@@ -399,7 +400,7 @@ export default class App {
         this.stage.removeChildren()
         this.theme.apply(this.stage)
 
-        const viewContainer = new PIXI.Container()
+        const viewContainer = this.viewContainer || new PIXI.Container()
         viewContainer.scale.set(this.config.initialScale)
         viewContainer.x = 20
         viewContainer.y = this.config.dashboardMode ? 20 : 40
@@ -411,7 +412,7 @@ export default class App {
             this.drawMenuBar()
         }
 
-        const tooltip = new Tooltip()
+        const tooltip = this.tooltip || new Tooltip()
         tooltip.draw()
         this.stage.addChild(tooltip)
 
