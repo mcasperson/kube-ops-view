@@ -16,7 +16,7 @@ export default class Menu extends PIXI.Graphics {
         this.items.reduce((verticalPos, item) => {
             const element = item.draw()
             this.addChild(element)
-            element.x = this.x + MENU_HORIZONTAL_PADDING
+            element.x = MENU_HORIZONTAL_PADDING
             element.y = verticalPos
             return verticalPos + element.height + MENU_VERTICAL_PADDING
         }, MENU_VERTICAL_PADDING)

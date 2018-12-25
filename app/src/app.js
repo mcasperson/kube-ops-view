@@ -430,7 +430,8 @@ export default class App {
 
     buildPodMenu() {
         const that = this
-        const getMenu = new Menu([
+
+        const getMenu = this.getMenu || new Menu([
             new Button('Get Pod', function (event) {
                 copyStringToClipboard('kubectl get pod ' + Pod.selected.name + ' -n ' + Pod.selected.namespace)
                 event.stopPropagation()
@@ -438,7 +439,7 @@ export default class App {
             })
         ])
 
-        const describeMenu = new Menu([
+        const describeMenu = this.describeMenu || new Menu([
             new Button('Describe Pod', function (event) {
                 copyStringToClipboard('kubectl describe pod ' + Pod.selected.name + ' -n ' + Pod.selected.namespace)
                 event.stopPropagation()
@@ -446,7 +447,7 @@ export default class App {
             })
         ])
 
-        const logsMenu = new Menu([
+        const logsMenu = this.logsMenu || new Menu([
             new Button('Pod Logs', function (event) {
                 copyStringToClipboard('kubectl logs ' + Pod.selected.name + ' -n ' + Pod.selected.namespace)
                 event.stopPropagation()
@@ -464,7 +465,7 @@ export default class App {
             })
         ])
 
-        const deleteMenu = new Menu([
+        const deleteMenu = this.deleteMenu || new Menu([
             new Button('Delete Pod', function (event) {
                 copyStringToClipboard('kubectl delete pod ' + Pod.selected.name + ' -n ' + Pod.selected.namespace)
                 event.stopPropagation()
@@ -492,7 +493,7 @@ export default class App {
             showMenu.visible = true
         }
 
-        const menu = new Menu([
+        const menu = this.menu || new Menu([
             new Button('Get >', function (event) {
                 showMenu(getMenu, this.getGlobalPosition().y)
                 event.stopPropagation()
@@ -514,6 +515,10 @@ export default class App {
         menu.visible = false
         this.stage.addChild(menu)
         this.menu = menu
+        this.deleteMenu = deleteMenu
+        this.logsMenu = logsMenu
+        this.describeMenu = describeMenu
+        this.getMenu = getMenu
         this.menus = menus
     }
 
