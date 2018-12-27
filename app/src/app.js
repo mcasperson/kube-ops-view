@@ -9,6 +9,7 @@ import Config from './config.js'
 import Button from './button'
 import Menu from './menu'
 import {copyStringToClipboard} from './utils'
+import Toast from './toast'
 
 const PIXI = require('pixi.js')
 
@@ -428,6 +429,10 @@ export default class App {
         this.tooltip = tooltip
     }
 
+    displayClipboardToast() {
+        this.stage.addChild(new Toast('Copied command to clipboard').draw())
+    }
+
     buildPodMenu() {
         const that = this
 
@@ -436,6 +441,7 @@ export default class App {
                 copyStringToClipboard('kubectl get pod ' + Pod.selected.name + ' -n ' + Pod.selected.namespace)
                 event.stopPropagation()
                 that.clearMenus()
+                that.displayClipboardToast()
             })
         ])
 
@@ -687,6 +693,8 @@ export default class App {
         // stop any current move animation
         this.viewContainerTargetPosition.x = this.viewContainer.x
         this.viewContainerTargetPosition.y = this.viewContainer.y
+
+        this.clearMenus()
     }
 
     tick(time) {
