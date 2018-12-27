@@ -1,6 +1,7 @@
 import Tooltip from './tooltip.js'
 import Cluster from './cluster.js'
 import {ALL_PODS, Pod, sortByAge, sortByCPU, sortByMemory, sortByName} from './pod.js'
+import Node from './node.js'
 import SelectBox from './selectbox'
 import {ALL_THEMES, Theme} from './themes.js'
 import {DESATURATION_FILTER} from './filters.js'
@@ -33,6 +34,7 @@ export default class App {
         this.clusterStatuses = new Map()
         this.viewContainerTargetPosition = new PIXI.Point()
         this.bootstrapping = true
+        this.menus = []
     }
 
     parseLocationHash() {
@@ -189,7 +191,7 @@ export default class App {
             prevX, prevY
 
         function mouseDownHandler(event) {
-            if (event.button == 0) {
+            if (event.button === 0) {
                 prevX = event.clientX
                 prevY = event.clientY
                 isDragging = true
@@ -303,6 +305,7 @@ export default class App {
      */
     clearMenus() {
         this.menu.visible = false
+        this.nodeMenu.visible = false
         this.menus.forEach(menu => menu.visible = false)
     }
 
@@ -409,6 +412,8 @@ export default class App {
 
         this.buildTooltip()
         this.buildPodMenu()
+        this.buildNodeMenu()
+        this.initMenus()
     }
 
     buildViewContainer() {
@@ -431,6 +436,71 @@ export default class App {
 
     displayClipboardToast() {
         this.stage.addChild(new Toast('Copied command to clipboard').draw())
+    }
+
+    showChildMenu(parentMenu, childMenu, y) {
+        this.menus.forEach(menu => menu.visible = false)
+        childMenu.x = parentMenu.getGlobalPosition().x + parentMenu.width
+        childMenu.y = y
+        childMenu.visible = true
+    }
+
+    initMenus() {
+        const menus = [
+            this.getMenu,
+            this.describeMenu,
+            this.logsMenu,
+            this.deleteMenu,
+            this.nodeGetMenu,
+            this.nodeDescribeMenu
+        ]
+
+        menus.forEach(menu => {
+            menu.draw()
+            menu.visible = false
+            this.stage.addChild(menu)
+        })
+
+        this.menus = menus
+    }
+
+    buildNodeMenu() {
+        const that = this
+
+        const nodeGetMenu = this.nodeGetMenu || new Menu([
+            new Button('Get Node', function (event) {
+                copyStringToClipboard('kubectl get node ' + Node.selected.name)
+                event.stopPropagation()
+                that.clearMenus()
+                that.displayClipboardToast()
+            })
+        ])
+
+        const nodeDescribeMenu = this.nodeDescribeMenu || new Menu([
+            new Button('Describe Node', function (event) {
+                copyStringToClipboard('kubectl describe node ' + Node.selected.name)
+                event.stopPropagation()
+                that.clearMenus()
+                that.displayClipboardToast()
+            })
+        ])
+
+        const nodeMenu = this.nodeMenu || new Menu([
+            new Button('Get >', function (event) {
+                that.showChildMenu(nodeMenu, nodeGetMenu, this.getGlobalPosition().y)
+                event.stopPropagation()
+            }),
+            new Button('Describe >', function (event) {
+                that.showChildMenu(nodeMenu, nodeDescribeMenu, this.getGlobalPosition().y)
+                event.stopPropagation()
+            })
+        ])
+        nodeMenu.draw()
+        nodeMenu.visible = false
+        this.stage.addChild(nodeMenu)
+        this.nodeMenu = nodeMenu
+        this.nodeGetMenu = nodeGetMenu
+        this.nodeDescribeMenu = nodeDescribeMenu
     }
 
     buildPodMenu() {
@@ -484,41 +554,21 @@ export default class App {
             })
         ])
 
-        const menus = [
-            getMenu,
-            describeMenu,
-            logsMenu,
-            deleteMenu
-        ]
-
-        menus.forEach(menu => {
-            menu.draw()
-            menu.visible = false
-            this.stage.addChild(menu)
-        })
-
-        function showMenu(showMenu, y) {
-            menus.forEach(menu => menu.visible = false)
-            showMenu.x = menu.x + menu.width
-            showMenu.y = y
-            showMenu.visible = true
-        }
-
         const menu = this.menu || new Menu([
             new Button('Get >', function (event) {
-                showMenu(getMenu, this.getGlobalPosition().y)
+                that.showChildMenu(menu, getMenu, this.getGlobalPosition().y)
                 event.stopPropagation()
             }),
             new Button('Describe >', function (event) {
-                showMenu(describeMenu, this.getGlobalPosition().y)
+                that.showChildMenu(menu, describeMenu, this.getGlobalPosition().y)
                 event.stopPropagation()
             }),
             new Button('Logs >', function (event) {
-                showMenu(logsMenu, this.getGlobalPosition().y)
+                that.showChildMenu(menu, logsMenu, this.getGlobalPosition().y)
                 event.stopPropagation()
             }),
             new Button('Delete >', function (event) {
-                showMenu(deleteMenu, this.getGlobalPosition().y)
+                that.showChildMenu(menu, deleteMenu, this.getGlobalPosition().y)
                 event.stopPropagation()
             })
         ])
@@ -530,7 +580,6 @@ export default class App {
         this.logsMenu = logsMenu
         this.describeMenu = describeMenu
         this.getMenu = getMenu
-        this.menus = menus
     }
 
     animatePodCreation(originalPod, globalPosition) {
@@ -652,7 +701,7 @@ export default class App {
                 const status = this.clusterStatuses.get(cluster.id)
                 let clusterBox = clusterComponentById[cluster.id]
                 if (!clusterBox) {
-                    clusterBox = new Cluster(cluster, status, this.tooltip, this.menu, this.zoomInto.bind(this))
+                    clusterBox = new Cluster(cluster, status, this.tooltip, this.menu, this.nodeMenu, this.zoomInto.bind(this))
                     this.viewContainer.addChild(clusterBox)
                 } else {
                     clusterBox.cluster = cluster

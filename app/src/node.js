@@ -2,16 +2,18 @@ import {Pod} from './pod.js'
 import Bars from './bars.js'
 import {parseResource} from './utils.js'
 import App from './app'
+import {MENU_HORIZONTAL_PADDING} from './menu'
 
 const PIXI = require('pixi.js')
 
 export default class Node extends PIXI.Graphics {
-    constructor(node, cluster, tooltip, menu) {
+    constructor(node, cluster, tooltip, menu, nodeMenu) {
         super()
         this.node = node
         this.cluster = cluster
         this.tooltip = tooltip
         this.menu = menu
+        this.nodeMenu = nodeMenu
     }
 
     isMaster() {
@@ -92,6 +94,13 @@ export default class Node extends PIXI.Graphics {
         })
         topHandle.on('mouseout', function () {
             nodeBox.tooltip.visible = false
+        })
+        topHandle.on('rightdown', function(event) {
+            Node.selected = nodeBox.node
+            nodeBox.nodeMenu.x = event.data.global.x
+            nodeBox.nodeMenu.y = event.data.global.y
+            nodeBox.nodeMenu.visible = true
+            event.stopPropagation()
         })
         const resources = this.getResourceUsage()
         const bars = new Bars(nodeBox, resources, nodeBox.tooltip)
