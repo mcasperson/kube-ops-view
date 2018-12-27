@@ -14,7 +14,6 @@ export default class Toast extends PIXI.Graphics
         super()
 
         this.interactive = true
-        this.buttonMode = true
 
         this.startTime = new Date().getTime()
         this.value = value
@@ -32,10 +31,14 @@ export default class Toast extends PIXI.Graphics
         PIXI.ticker.shared.add(this.tick, this)
     }
 
+    destroy() {
+        this.parent.removeChild(this)
+        PIXI.ticker.shared.remove(this.tick, this)
+        super.destroy()
+    }
+
     tick() {
         if (new Date().getTime() - this.startTime > TIME_TO_LIVE) {
-            this.parent.removeChild(this)
-            PIXI.ticker.shared.remove(this.tick, this)
             this.destroy()
         }
     }
@@ -64,6 +67,8 @@ export default class Toast extends PIXI.Graphics
 
         this.x = window.innerWidth - toast.width - TOAST_HORIZONTAL_MARGIN
         this.y = window.innerHeight - toast.height - TOAST_VERTICAL_MARGIN
+
+        toast.hitArea = new PIXI.Rectangle(0, 0, toast.width, toast.height)
 
         return toast
     }
