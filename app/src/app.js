@@ -450,6 +450,7 @@ export default class App {
                 copyStringToClipboard('kubectl describe pod ' + Pod.selected.name + ' -n ' + Pod.selected.namespace)
                 event.stopPropagation()
                 that.clearMenus()
+                that.displayClipboardToast()
             })
         ])
 
@@ -458,16 +459,19 @@ export default class App {
                 copyStringToClipboard('kubectl logs ' + Pod.selected.name + ' -n ' + Pod.selected.namespace)
                 event.stopPropagation()
                 that.clearMenus()
+                that.displayClipboardToast()
             }),
             new Button('Pod Logs Following', function (event) {
                 copyStringToClipboard('kubectl logs ' + Pod.selected.name + ' -n ' + Pod.selected.namespace + ' -f')
                 event.stopPropagation()
                 that.clearMenus()
+                that.displayClipboardToast()
             }),
             new Button('Pod Logs Previous', function (event) {
                 copyStringToClipboard('kubectl logs --previous ' + Pod.selected.name + ' -n ' + Pod.selected.namespace)
                 event.stopPropagation()
                 that.clearMenus()
+                that.displayClipboardToast()
             })
         ])
 
@@ -476,6 +480,7 @@ export default class App {
                 copyStringToClipboard('kubectl delete pod ' + Pod.selected.name + ' -n ' + Pod.selected.namespace)
                 event.stopPropagation()
                 that.clearMenus()
+                that.displayClipboardToast()
             })
         ])
 
