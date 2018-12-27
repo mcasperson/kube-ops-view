@@ -34,6 +34,8 @@ export default class Toast extends PIXI.Graphics
 
     tick() {
         if (new Date().getTime() - this.startTime > TIME_TO_LIVE) {
+            this.parent.removeChild(this)
+            PIXI.ticker.shared.remove(this.tick, this)
             this.destroy()
         }
     }
