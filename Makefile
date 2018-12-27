@@ -28,3 +28,11 @@ push: docker
 
 mock:
 	docker run $(TTYFLAGS) -p 8080:8080 "$(IMAGE):$(TAG)" --mock
+
+heroku:
+	mv Dockerfile Dockerfile-Original
+	cp Dockerfile-Heroku Dockerfile
+	heroku container:push web
+	heroku container:release web
+	rm Dockerfile
+	mv Dockerfile-Original Dockerfile
