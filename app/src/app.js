@@ -452,7 +452,9 @@ export default class App {
             this.logsMenu,
             this.deleteMenu,
             this.nodeGetMenu,
-            this.nodeDescribeMenu
+            this.nodeDescribeMenu,
+            this.nodeManageMenu,
+            this.manageMenu
         ]
 
         menus.forEach(menu => {
@@ -485,6 +487,45 @@ export default class App {
             })
         ])
 
+        const nodeManageMenu = this.nodeManageMenu || new Menu([
+            new Button('Drain Node', function (event) {
+                copyStringToClipboard('kubectl drain ' + Node.selected.name)
+                event.stopPropagation()
+                that.clearMenus()
+                that.displayClipboardToast()
+            }),
+            new Button('Cordon Node', function (event) {
+                copyStringToClipboard('kubectl cordon ' + Node.selected.name)
+                event.stopPropagation()
+                that.clearMenus()
+                that.displayClipboardToast()
+            }),
+            new Button('Uncordon Node', function (event) {
+                copyStringToClipboard('kubectl uncordon ' + Node.selected.name)
+                event.stopPropagation()
+                that.clearMenus()
+                that.displayClipboardToast()
+            }),
+            new Button('Taint Node', function (event) {
+                copyStringToClipboard('kubectl taint nodes ' + Node.selected.name + ' key=value:taintname')
+                event.stopPropagation()
+                that.clearMenus()
+                that.displayClipboardToast()
+            }),
+            new Button('Untaint Node', function (event) {
+                copyStringToClipboard('kubectl taint nodes ' + Node.selected.name + ' key=value:taintname-')
+                event.stopPropagation()
+                that.clearMenus()
+                that.displayClipboardToast()
+            }),
+            new Button('Top Node', function (event) {
+                copyStringToClipboard('kubectl top node ' + Node.selected.name)
+                event.stopPropagation()
+                that.clearMenus()
+                that.displayClipboardToast()
+            })
+        ])
+
         const nodeMenu = this.nodeMenu || new Menu([
             new Button('Get >', function (event) {
                 that.showChildMenu(nodeMenu, nodeGetMenu, this.getGlobalPosition().y)
@@ -492,6 +533,10 @@ export default class App {
             }),
             new Button('Describe >', function (event) {
                 that.showChildMenu(nodeMenu, nodeDescribeMenu, this.getGlobalPosition().y)
+                event.stopPropagation()
+            }),
+            new Button('Manage >', function (event) {
+                that.showChildMenu(nodeMenu, nodeManageMenu, this.getGlobalPosition().y)
                 event.stopPropagation()
             })
         ])
@@ -501,6 +546,7 @@ export default class App {
         this.nodeMenu = nodeMenu
         this.nodeGetMenu = nodeGetMenu
         this.nodeDescribeMenu = nodeDescribeMenu
+        this.nodeManageMenu = nodeManageMenu
     }
 
     buildPodMenu() {
@@ -554,6 +600,39 @@ export default class App {
             })
         ])
 
+        const manageMenu = this.manageMenu || new Menu([
+            new Button('Powershell Exec', function (event) {
+                copyStringToClipboard('kubectl exec ' + Pod.selected.name + ' -n ' + Pod.selected.namespace + ' -- powershell -Command "<command>"')
+                event.stopPropagation()
+                that.clearMenus()
+                that.displayClipboardToast()
+            }),
+            new Button('Bash Exec', function (event) {
+                copyStringToClipboard('kubectl exec ' + Pod.selected.name + ' -n ' + Pod.selected.namespace + ' -- /bin/bash -c "<command>"')
+                event.stopPropagation()
+                that.clearMenus()
+                that.displayClipboardToast()
+            }),
+            new Button('Powershell Interactive', function (event) {
+                copyStringToClipboard('kubectl exec ' + Pod.selected.name + ' -n ' + Pod.selected.namespace + ' -it -- powershell')
+                event.stopPropagation()
+                that.clearMenus()
+                that.displayClipboardToast()
+            }),
+            new Button('Bash Interactive', function (event) {
+                copyStringToClipboard('kubectl exec ' + Pod.selected.name + ' -n ' + Pod.selected.namespace + ' -it -- /bin/bash')
+                event.stopPropagation()
+                that.clearMenus()
+                that.displayClipboardToast()
+            }),
+            new Button('Top Pod', function (event) {
+                copyStringToClipboard('kubectl top pod ' + Pod.selected.name + ' -n ' + Pod.selected.namespace)
+                event.stopPropagation()
+                that.clearMenus()
+                that.displayClipboardToast()
+            })
+        ])
+
         const menu = this.menu || new Menu([
             new Button('Get >', function (event) {
                 that.showChildMenu(menu, getMenu, this.getGlobalPosition().y)
@@ -570,6 +649,10 @@ export default class App {
             new Button('Delete >', function (event) {
                 that.showChildMenu(menu, deleteMenu, this.getGlobalPosition().y)
                 event.stopPropagation()
+            }),
+            new Button('Manage >', function (event) {
+                that.showChildMenu(menu, manageMenu, this.getGlobalPosition().y)
+                event.stopPropagation()
             })
         ])
         menu.draw()
@@ -580,6 +663,7 @@ export default class App {
         this.logsMenu = logsMenu
         this.describeMenu = describeMenu
         this.getMenu = getMenu
+        this.manageMenu = manageMenu
     }
 
     animatePodCreation(originalPod, globalPosition) {
