@@ -201,7 +201,7 @@ class CommaSeparatedValues(click.ParamType):
 @click.command(context_settings={'help_option_names': ['-h', '--help']})
 @click.option('-V', '--version', is_flag=True, callback=print_version, expose_value=False, is_eager=True,
               help='Print the current version number and exit.')
-@click.option('-p', '--port', type=int, help='HTTP port to listen on (default: 8080)', envvar='SERVER_PORT', default=8080)
+@click.option('-p', '--port', type=int, help='HTTP port to listen on (default: 8080)', envvar='SERVER_PORT', default=os.getenv('PORT', '8080'))
 @click.option('-d', '--debug', is_flag=True, help='Run in debugging mode', envvar='DEBUG')
 @click.option('-m', '--mock', is_flag=True, help='Mock Kubernetes clusters', envvar='MOCK')
 @click.option('--secret-key', help='Secret key for session cookies', envvar='SECRET_KEY', default='development')
