@@ -343,7 +343,7 @@ export class Pod extends PIXI.Graphics {
                         return {min: Number(current.pod.kovmetadata[field]), max: memo.max}
                     }
 
-                    if (Number(current.pod.kovmetadata[field]) > memo.min) {
+                    if (Number(current.pod.kovmetadata[field]) > memo.max) {
                         return {min: memo.min, max: Number(current.pod.kovmetadata[field])}
                     }
                 }
