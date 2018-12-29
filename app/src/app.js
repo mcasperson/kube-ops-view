@@ -482,6 +482,10 @@ export default class App {
             .addSubMenu('Manage >', function(subMenu) {
                 subMenu
                     .addButton(
+                        'Version',
+                        that.copyCommandToClipboard(
+                            () => 'kubectl version'))
+                    .addButton(
                         'Cluster Info',
                         that.copyCommandToClipboard(
                             () => 'kubectl cluster-info'))
@@ -489,6 +493,29 @@ export default class App {
                         'Cluster Info Dump',
                         that.copyCommandToClipboard(
                             () =>'kubectl cluster-info dump'))
+                    .addButton(
+                        'API Versions',
+                        that.copyCommandToClipboard(
+                            () => 'kubectl api-versions'))
+                    .addButton(
+                        'API Resources',
+                        that.copyCommandToClipboard(
+                            () => 'kubectl api-resources'))
+            })
+            .addSubMenu('Docker >', function(subMenu) {
+                subMenu
+                    .addButton(
+                        'Run Container',
+                        that.copyCommandToClipboard(
+                            () => 'kubectl run --image=<image> <name> --port=<port> --env="<environment variable name>=<environment variable value>'))
+                    .addButton(
+                        'Expose Container',
+                        that.copyCommandToClipboard(
+                            () => 'kubectl expose deployment <name> --port=<port> --name=<name>'))
+                    .addButton(
+                        'Attach To Container',
+                        that.copyCommandToClipboard(
+                            () => 'kubectl attach -it <name>'))
             })
         this.clusterMenu = clusterMenu
     }
@@ -510,6 +537,17 @@ export default class App {
                         'Describe Node',
                         that.copyCommandToClipboard(
                             () => 'kubectl describe node ' + Node.selected.name))
+            })
+            .addSubMenu('Label & Annotate >', function (subMenu) {
+                subMenu
+                    .addButton('Label Node', that.copyCommandToClipboard(
+                        function () {
+                            'kubectl label nodes ' + Node.selected.name + ' label-name=label-value'
+                        }))
+                    .addButton('Annotate Node', that.copyCommandToClipboard(
+                        function () {
+                            'kubectl annotate nodes ' + Node.selected.name + ' annotation-name=annotation-value'
+                        }))
             })
             .addSubMenu('Manage >', function(subMenu) {
                 subMenu
@@ -577,6 +615,17 @@ export default class App {
                             'kubectl delete pod ' + Pod.selected.name + ' -n ' + Pod.selected.namespace
                         }))
             })
+            .addSubMenu('Label & Annotate >', function (subMenu) {
+                subMenu
+                    .addButton('Label Pod', that.copyCommandToClipboard(
+                        function () {
+                            'kubectl label pods ' + Pod.selected.name + ' -n ' + Pod.selected.namespace + ' label-name=label-value'
+                        }))
+                    .addButton('Annotate Pod', that.copyCommandToClipboard(
+                        function () {
+                            'kubectl annotate pods ' + Pod.selected.name + ' -n ' + Pod.selected.namespace + ' annotation-name=annotation-value'
+                        }))
+            })
             .addSubMenu('Manage >', function (subMenu) {
                 subMenu
                     .addButton(
@@ -603,6 +652,17 @@ export default class App {
                         'Top Pod',
                         that.copyCommandToClipboard(
                             () => 'kubectl top pod ' + Pod.selected.name + ' -n ' + Pod.selected.namespace))
+            })
+            .addSubMenu('Copy >', function (subMenu) {
+                subMenu
+                    .addButton('Copy From Pod', that.copyCommandToClipboard(
+                        function () {
+                            'kubectl cp ' + Pod.selected.namespace + '/' + Pod.selected.name + ':/a/file/in/the/pod /some/local/file'
+                        }))
+                    .addButton('Copy Into Pod', that.copyCommandToClipboard(
+                        function () {
+                            'kubectl cp /some/local/file ' + Pod.selected.namespace + '/' + Pod.selected.name + ':/a/file/in/the/pod'
+                        }))
             })
         this.menu = menu
     }
