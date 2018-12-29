@@ -51,17 +51,19 @@ export default class Menu extends PIXI.Graphics {
         const subMenu = new Menu(this.stage, this)
         buildMenu(subMenu)
         this.addButton(label, function() {
-            that.showChildMenu(subMenu, this.getGlobalPosition().y)
+            subMenu.showMenu(
+                that.getGlobalPosition().x + that.width,
+                this.getGlobalPosition().y)
         })
         return this
     }
 
-    showChildMenu(childMenu, y) {
+    showMenu(x, y) {
         ALL_MENUS.forEach(menu => {
-            menu.visible = childMenu.isMeOrParent(menu)
+            menu.visible = this.isMeOrParent(menu)
         })
-        childMenu.x = this.getGlobalPosition().x + this.width
-        childMenu.y = y
+        this.x = x
+        this.y = y
     }
 
     isMeOrParent(menu) {

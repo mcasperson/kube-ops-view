@@ -435,13 +435,10 @@ export default class App {
         this.stage.addChild(new Toast('Copied command to clipboard').draw())
     }
 
-
-
     initMenus() {
         ALL_MENUS.forEach(menu => {
             menu.draw()
             menu.visible = false
-            this.stage.addChild(menu)
         })
     }
 
@@ -468,7 +465,7 @@ export default class App {
             .addSubMenu('Get >', function(subMenu) {
                 subMenu
                     .addButton(
-                        'Describe Node',
+                        'Get Node',
                         that.copyCommandToClipboard(
                             () => 'kubectl get node ' + Node.selected.name))
             })
@@ -502,7 +499,6 @@ export default class App {
                         that.copyCommandToClipboard(
                             () => 'kubectl top node ' + Node.selected.name))
             })
-        nodeMenu.draw()
         this.nodeMenu = nodeMenu
     }
 
@@ -573,8 +569,6 @@ export default class App {
                         that.copyCommandToClipboard(
                             () => 'kubectl top pod ' + Pod.selected.name + ' -n ' + Pod.selected.namespace))
             })
-
-        menu.draw()
         this.menu = menu
     }
 
