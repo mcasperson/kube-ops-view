@@ -331,7 +331,7 @@ export class Pod extends PIXI.Graphics {
             const smallPreference = metaJson.preference === 'small'
             const normalizedRange = metaJson.max - metaJson.min
             const color = normalizedRange === 0 ? 0 : Math.max(Math.min(((Number(this.pod.kovmetadata[field]) || metaJson.min) - metaJson.min) / normalizedRange, 1), 0)
-            return {color: PIXI.utils.rgb2hex(HSVtoRGB(color * maxHue, 1, 1))}
+            return {color: PIXI.utils.rgb2hex(HSVtoRGB(smallPreference ? maxHue - color * maxHue : color * maxHue, 1, 1))}
         } else {
             const range = Object.values(ALL_PODS).reduce((memo, current) => {
                 if (!memo) {
