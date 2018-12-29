@@ -54,6 +54,7 @@ export default class Menu extends PIXI.Graphics {
             subMenu.showMenu(
                 that.getGlobalPosition().x + that.width,
                 this.getGlobalPosition().y)
+            App.stopGlobalEvents = true
         })
         return this
     }

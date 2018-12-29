@@ -16,7 +16,6 @@ const PIXI = require('pixi.js')
 
 const addWheelListener = require('./vendor/addWheelListener')
 
-
 export default class App {
 
     constructor() {
@@ -151,108 +150,123 @@ export default class App {
 
     registerEventListeners() {
         function downHandler(event) {
-            const panAmount = 20
-            if (event.key == 'ArrowLeft') {
-                this.viewContainerTargetPosition.x += panAmount
+            if (!App.stopGlobalEvents) {
+                const panAmount = 20
+                if (event.key == 'ArrowLeft') {
+                    this.viewContainerTargetPosition.x += panAmount
+                } else if (event.key == 'ArrowRight') {
+                    this.viewContainerTargetPosition.x -= panAmount
+                }
+                if (event.key == 'ArrowUp') {
+                    this.viewContainerTargetPosition.y += panAmount
+                } else if (event.key == 'ArrowDown') {
+                    this.viewContainerTargetPosition.y -= panAmount
+                }
+                if (event.key == 'PageUp') {
+                    this.viewContainerTargetPosition.y += window.innerHeight
+                } else if (event.key == 'PageDown') {
+                    this.viewContainerTargetPosition.y -= window.innerHeight
+                } else if (event.key == 'Home') {
+                    this.viewContainerTargetPosition.x = 20
+                    this.viewContainerTargetPosition.y = this.config.dashboardMode ? 20 : 40
+                } else if (event.key && event.key.length == 1 && !event.ctrlKey && !event.metaKey) {
+                    this.filterString += event.key
+                    this.filter()
+                    event.preventDefault()
+                } else if (event.key == 'Backspace') {
+                    this.filterString = this.filterString.slice(0, Math.max(0, this.filterString.length - 1))
+                    this.filter()
+                    event.preventDefault()
+                }
             }
-            else if (event.key == 'ArrowRight') {
-                this.viewContainerTargetPosition.x -= panAmount
-            }
-            if (event.key == 'ArrowUp') {
-                this.viewContainerTargetPosition.y += panAmount
-            }
-            else if (event.key == 'ArrowDown') {
-                this.viewContainerTargetPosition.y -= panAmount
-            }
-            if (event.key == 'PageUp') {
-                this.viewContainerTargetPosition.y += window.innerHeight
-            }
-            else if (event.key == 'PageDown') {
-                this.viewContainerTargetPosition.y -= window.innerHeight
-            }
-            else if (event.key == 'Home') {
-                this.viewContainerTargetPosition.x = 20
-                this.viewContainerTargetPosition.y = this.config.dashboardMode ? 20 : 40
-            }
-            else if (event.key && event.key.length == 1 && !event.ctrlKey && !event.metaKey) {
-                this.filterString += event.key
-                this.filter()
-                event.preventDefault()
-            }
-            else if (event.key == 'Backspace') {
-                this.filterString = this.filterString.slice(0, Math.max(0, this.filterString.length - 1))
-                this.filter()
-                event.preventDefault()
-            }
+            App.stopGlobalEvents = false
         }
 
         var isDragging = false,
             prevX, prevY
 
         function mouseDownHandler(event) {
-            if (event.button === 0) {
-                prevX = event.clientX
-                prevY = event.clientY
-                isDragging = true
-                this.renderer.view.style.cursor = 'move'
+            if (!App.stopGlobalEvents) {
+                if (event.button === 0) {
+                    prevX = event.clientX
+                    prevY = event.clientY
+                    isDragging = true
+                    this.renderer.view.style.cursor = 'move'
+                }
             }
+            App.stopGlobalEvents = false
         }
 
         function mouseMoveHandler(event) {
-            if (!isDragging) {
-                return
-            }
-            var dx = event.clientX - prevX
-            var dy = event.clientY - prevY
-
-            this.viewContainer.x += dx
-            this.viewContainer.y += dy
-            // stop any current move animation
-            this.viewContainerTargetPosition.x = this.viewContainer.x
-            this.viewContainerTargetPosition.y = this.viewContainer.y
-            prevX = event.clientX
-            prevY = event.clientY
-
-            this.clearMenus()
-        }
-
-        function mouseUpHandler(_event) {
-            isDragging = false
-            this.renderer.view.style.cursor = 'default'
-        }
-
-        function touchStartHandler(event) {
-            if (event.touches.length == 1) {
-                const touch = event.touches[0]
-                prevX = touch.clientX
-                prevY = touch.clientY
-                isDragging = true
-            }
-        }
-
-        function touchMoveHandler(event) {
-            if (!isDragging) {
-                return
-            }
-            if (event.touches.length == 1) {
-                const touch = event.touches[0]
-                var dx = touch.clientX - prevX
-                var dy = touch.clientY - prevY
+            if (!App.stopGlobalEvents) {
+                if (!isDragging) {
+                    return
+                }
+                var dx = event.clientX - prevX
+                var dy = event.clientY - prevY
 
                 this.viewContainer.x += dx
                 this.viewContainer.y += dy
                 // stop any current move animation
                 this.viewContainerTargetPosition.x = this.viewContainer.x
                 this.viewContainerTargetPosition.y = this.viewContainer.y
-                prevX = touch.clientX
-                prevY = touch.clientY
+                prevX = event.clientX
+                prevY = event.clientY
 
                 this.clearMenus()
             }
+            App.stopGlobalEvents = false
+        }
+
+        function mouseUpHandler(_event) {
+            if (!App.stopGlobalEvents) {
+                isDragging = false
+                this.renderer.view.style.cursor = 'default'
+            }
+            App.stopGlobalEvents = false
+        }
+
+        function touchStartHandler(event) {
+            if (!App.stopGlobalEvents) {
+                if (event.touches.length == 1) {
+                    const touch = event.touches[0]
+                    prevX = touch.clientX
+                    prevY = touch.clientY
+                    isDragging = true
+                }
+            }
+            App.stopGlobalEvents = false
+        }
+
+        function touchMoveHandler(event) {
+            if (!App.stopGlobalEvents) {
+                if (!isDragging) {
+                    return
+                }
+                if (event.touches.length == 1) {
+                    const touch = event.touches[0]
+                    var dx = touch.clientX - prevX
+                    var dy = touch.clientY - prevY
+
+                    this.viewContainer.x += dx
+                    this.viewContainer.y += dy
+                    // stop any current move animation
+                    this.viewContainerTargetPosition.x = this.viewContainer.x
+                    this.viewContainerTargetPosition.y = this.viewContainer.y
+                    prevX = touch.clientX
+                    prevY = touch.clientY
+
+                    this.clearMenus()
+                }
+            }
+            App.stopGlobalEvents = false
         }
 
         function touchEndHandler(_event) {
-            isDragging = false
+            if (!App.stopGlobalEvents) {
+                isDragging = false
+            }
+            App.stopGlobalEvents = false
         }
 
         addEventListener('keydown', downHandler.bind(this), false)
@@ -452,6 +466,7 @@ export default class App {
     copyCommandToClipboard(generateCommand) {
         const that = this
         return function (event) {
+            App.stopGlobalEvents = true
             event.stopPropagation()
             copyStringToClipboard(generateCommand())
             that.clearMenus()
@@ -903,3 +918,11 @@ export default class App {
         PIXI.ticker.shared.add(this.tick, this)
     }
 }
+
+/**
+ * Setting this to true will prevent the global event handlers from
+ * intercepting an event. This is used to stop native event handlers
+ * from Pixi.js event handlers.
+ * @type {boolean}
+ */
+App.stopGlobalEvents = false
