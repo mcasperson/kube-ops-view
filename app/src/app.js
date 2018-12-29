@@ -8,7 +8,7 @@ import {DESATURATION_FILTER} from './filters.js'
 import {JSON_delta} from './vendor/json_delta.js'
 import Config from './config.js'
 import Button from './button'
-import Menu from './menu'
+import Menu, {ALL_MENUS} from './menu'
 import {copyStringToClipboard} from './utils'
 import Toast from './toast'
 
@@ -34,7 +34,6 @@ export default class App {
         this.clusterStatuses = new Map()
         this.viewContainerTargetPosition = new PIXI.Point()
         this.bootstrapping = true
-        this.menus = []
     }
 
     parseLocationHash() {
@@ -304,9 +303,7 @@ export default class App {
      * Hide any context menus when we start zooming or panning
      */
     clearMenus() {
-        this.menu.visible = false
-        this.nodeMenu.visible = false
-        this.menus.forEach(menu => menu.visible = false)
+        ALL_MENUS.forEach(menu => menu.visible = false)
     }
 
     drawMenuBar() {
@@ -393,7 +390,7 @@ export default class App {
     drawResetButton(menuBar) {
         const resetButton = new Button('RESET', () => {
             this.draw()
-            //this.update()
+            this.update()
         })
         resetButton.x = 570
         resetButton.y = 3
@@ -438,232 +435,147 @@ export default class App {
         this.stage.addChild(new Toast('Copied command to clipboard').draw())
     }
 
-    showChildMenu(parentMenu, childMenu, y) {
-        this.menus.forEach(menu => menu.visible = false)
-        childMenu.x = parentMenu.getGlobalPosition().x + parentMenu.width
-        childMenu.y = y
-        childMenu.visible = true
-    }
+
 
     initMenus() {
-        const menus = [
-            this.getMenu,
-            this.describeMenu,
-            this.logsMenu,
-            this.deleteMenu,
-            this.nodeGetMenu,
-            this.nodeDescribeMenu,
-            this.nodeManageMenu,
-            this.manageMenu
-        ]
-
-        menus.forEach(menu => {
+        ALL_MENUS.forEach(menu => {
             menu.draw()
             menu.visible = false
             this.stage.addChild(menu)
         })
+    }
 
-        this.menus = menus
+    /**
+     * Builds a button that copies a string to the clipboard
+     * @param label The button label
+     * @param generateCommand A function that returns the command string
+     * @returns {Button} A new button object
+     */
+    copyCommandToClipboard(generateCommand) {
+        const that = this
+        return function (event) {
+            event.stopPropagation()
+            copyStringToClipboard(generateCommand())
+            that.clearMenus()
+            that.displayClipboardToast()
+        }
     }
 
     buildNodeMenu() {
         const that = this
 
-        const nodeGetMenu = this.nodeGetMenu || new Menu([
-            new Button('Get Node', function (event) {
-                copyStringToClipboard('kubectl get node ' + Node.selected.name)
-                event.stopPropagation()
-                that.clearMenus()
-                that.displayClipboardToast()
+        const nodeMenu = this.nodeMenu || new Menu(this.stage)
+            .addSubMenu('Get >', function(subMenu) {
+                subMenu
+                    .addButton(
+                        'Describe Node',
+                        that.copyCommandToClipboard(
+                            () => 'kubectl get node ' + Node.selected.name))
             })
-        ])
-
-        const nodeDescribeMenu = this.nodeDescribeMenu || new Menu([
-            new Button('Describe Node', function (event) {
-                copyStringToClipboard('kubectl describe node ' + Node.selected.name)
-                event.stopPropagation()
-                that.clearMenus()
-                that.displayClipboardToast()
+            .addSubMenu('Describe >', function(subMenu) {
+                subMenu
+                    .addButton(
+                        'Describe Node',
+                        that.copyCommandToClipboard(
+                            () => 'kubectl describe node ' + Node.selected.name))
             })
-        ])
-
-        const nodeManageMenu = this.nodeManageMenu || new Menu([
-            new Button('Drain Node', function (event) {
-                copyStringToClipboard('kubectl drain ' + Node.selected.name)
-                event.stopPropagation()
-                that.clearMenus()
-                that.displayClipboardToast()
-            }),
-            new Button('Cordon Node', function (event) {
-                copyStringToClipboard('kubectl cordon ' + Node.selected.name)
-                event.stopPropagation()
-                that.clearMenus()
-                that.displayClipboardToast()
-            }),
-            new Button('Uncordon Node', function (event) {
-                copyStringToClipboard('kubectl uncordon ' + Node.selected.name)
-                event.stopPropagation()
-                that.clearMenus()
-                that.displayClipboardToast()
-            }),
-            new Button('Taint Node', function (event) {
-                copyStringToClipboard('kubectl taint nodes ' + Node.selected.name + ' key=value:taintname')
-                event.stopPropagation()
-                that.clearMenus()
-                that.displayClipboardToast()
-            }),
-            new Button('Untaint Node', function (event) {
-                copyStringToClipboard('kubectl taint nodes ' + Node.selected.name + ' key=value:taintname-')
-                event.stopPropagation()
-                that.clearMenus()
-                that.displayClipboardToast()
-            }),
-            new Button('Top Node', function (event) {
-                copyStringToClipboard('kubectl top node ' + Node.selected.name)
-                event.stopPropagation()
-                that.clearMenus()
-                that.displayClipboardToast()
+            .addSubMenu('Manage >', function(subMenu) {
+                subMenu
+                    .addButton(
+                        'Drain Node',
+                        that.copyCommandToClipboard(
+                            () => 'kubectl drain ' + Node.selected.name))
+                    .addButton(
+                        'Cordon Node',
+                        that.copyCommandToClipboard(
+                            () =>'kubectl cordon ' + Node.selected.name))
+                    .addButton(
+                        'Uncordon Node',
+                        that.copyCommandToClipboard(
+                            () => 'kubectl taint nodes ' + Node.selected.name + ' key=value:taintname'))
+                    .addButton(
+                        'Untaint Node',
+                        that.copyCommandToClipboard(
+                            () => 'kubectl taint nodes ' + Node.selected.name + ' key=value:taintname-'))
+                    .addButton(
+                        'Top Node',
+                        that.copyCommandToClipboard(
+                            () => 'kubectl top node ' + Node.selected.name))
             })
-        ])
-
-        const nodeMenu = this.nodeMenu || new Menu([
-            new Button('Get >', function (event) {
-                that.showChildMenu(nodeMenu, nodeGetMenu, this.getGlobalPosition().y)
-                event.stopPropagation()
-            }),
-            new Button('Describe >', function (event) {
-                that.showChildMenu(nodeMenu, nodeDescribeMenu, this.getGlobalPosition().y)
-                event.stopPropagation()
-            }),
-            new Button('Manage >', function (event) {
-                that.showChildMenu(nodeMenu, nodeManageMenu, this.getGlobalPosition().y)
-                event.stopPropagation()
-            })
-        ])
         nodeMenu.draw()
-        nodeMenu.visible = false
-        this.stage.addChild(nodeMenu)
         this.nodeMenu = nodeMenu
-        this.nodeGetMenu = nodeGetMenu
-        this.nodeDescribeMenu = nodeDescribeMenu
-        this.nodeManageMenu = nodeManageMenu
     }
 
     buildPodMenu() {
         const that = this
 
-        const getMenu = this.getMenu || new Menu([
-            new Button('Get Pod', function (event) {
-                copyStringToClipboard('kubectl get pod ' + Pod.selected.name + ' -n ' + Pod.selected.namespace)
-                event.stopPropagation()
-                that.clearMenus()
-                that.displayClipboardToast()
+        const menu = this.menu || new Menu(this.stage)
+            .addSubMenu('Get >', function (subMenu) {
+                subMenu
+                    .addButton(
+                        'Get Pod',
+                        that.copyCommandToClipboard(
+                            () => 'kubectl get pod ' + Pod.selected.name + ' -n ' + Pod.selected.namespace))
             })
-        ])
+            .addSubMenu('Describe >', function (subMenu) {
+                subMenu
+                    .addButton(
+                        'Describe Pod',
+                        that.copyCommandToClipboard(
+                            () => 'kubectl describe pod ' + Pod.selected.name + ' -n ' + Pod.selected.namespace))
+            })
+            .addSubMenu('Logs >', function (subMenu) {
+                subMenu
+                    .addButton(
+                        'Pod Logs',
+                        that.copyCommandToClipboard(
+                            () => 'kubectl logs ' + Pod.selected.name + ' -n ' + Pod.selected.namespace))
+                    .addButton(
+                        'Pod Logs Following',
+                        that.copyCommandToClipboard(
+                            ()=> 'kubectl logs ' + Pod.selected.name + ' -n ' + Pod.selected.namespace + ' -f'))
+                    .addButton(
+                        'Pod Logs Previous',
+                        that.copyCommandToClipboard(
+                            () => 'kubectl logs --previous ' + Pod.selected.name + ' -n ' + Pod.selected.namespace))
+            })
+            .addSubMenu('Delete >', function (subMenu) {
+                subMenu
+                    .addButton('Delete Pod', that.copyCommandToClipboard(
+                        function () {
+                            'kubectl delete pod ' + Pod.selected.name + ' -n ' + Pod.selected.namespace
+                        }))
+            })
+            .addSubMenu('Manage >', function (subMenu) {
+                subMenu
+                    .addButton(
+                        'Powershell Exec',
+                        that.copyCommandToClipboard(
+                            () => 'kubectl exec ' + Pod.selected.name + ' -n ' + Pod.selected.namespace +
+                                ' -- powershell -Command "<command>"'))
+                    .addButton(
+                        'Bash Exec',
+                        that.copyCommandToClipboard(
+                            () => 'kubectl exec ' + Pod.selected.name + ' -n ' + Pod.selected.namespace +
+                                ' -- /bin/bash -c "<command>"'))
+                    .addButton(
+                        'Powershell Interactive',
+                        that.copyCommandToClipboard(
+                            () => 'kubectl exec ' + Pod.selected.name + ' -n ' + Pod.selected.namespace +
+                                ' -it -- powershell'))
+                    .addButton(
+                        'Bash Interactive',
+                        that.copyCommandToClipboard(
+                            () => 'kubectl exec ' + Pod.selected.name + ' -n ' + Pod.selected.namespace +
+                                ' -it -- /bin/bash'))
+                    .addButton(
+                        'Top Pod',
+                        that.copyCommandToClipboard(
+                            () => 'kubectl top pod ' + Pod.selected.name + ' -n ' + Pod.selected.namespace))
+            })
 
-        const describeMenu = this.describeMenu || new Menu([
-            new Button('Describe Pod', function (event) {
-                copyStringToClipboard('kubectl describe pod ' + Pod.selected.name + ' -n ' + Pod.selected.namespace)
-                event.stopPropagation()
-                that.clearMenus()
-                that.displayClipboardToast()
-            })
-        ])
-
-        const logsMenu = this.logsMenu || new Menu([
-            new Button('Pod Logs', function (event) {
-                copyStringToClipboard('kubectl logs ' + Pod.selected.name + ' -n ' + Pod.selected.namespace)
-                event.stopPropagation()
-                that.clearMenus()
-                that.displayClipboardToast()
-            }),
-            new Button('Pod Logs Following', function (event) {
-                copyStringToClipboard('kubectl logs ' + Pod.selected.name + ' -n ' + Pod.selected.namespace + ' -f')
-                event.stopPropagation()
-                that.clearMenus()
-                that.displayClipboardToast()
-            }),
-            new Button('Pod Logs Previous', function (event) {
-                copyStringToClipboard('kubectl logs --previous ' + Pod.selected.name + ' -n ' + Pod.selected.namespace)
-                event.stopPropagation()
-                that.clearMenus()
-                that.displayClipboardToast()
-            })
-        ])
-
-        const deleteMenu = this.deleteMenu || new Menu([
-            new Button('Delete Pod', function (event) {
-                copyStringToClipboard('kubectl delete pod ' + Pod.selected.name + ' -n ' + Pod.selected.namespace)
-                event.stopPropagation()
-                that.clearMenus()
-                that.displayClipboardToast()
-            })
-        ])
-
-        const manageMenu = this.manageMenu || new Menu([
-            new Button('Powershell Exec', function (event) {
-                copyStringToClipboard('kubectl exec ' + Pod.selected.name + ' -n ' + Pod.selected.namespace + ' -- powershell -Command "<command>"')
-                event.stopPropagation()
-                that.clearMenus()
-                that.displayClipboardToast()
-            }),
-            new Button('Bash Exec', function (event) {
-                copyStringToClipboard('kubectl exec ' + Pod.selected.name + ' -n ' + Pod.selected.namespace + ' -- /bin/bash -c "<command>"')
-                event.stopPropagation()
-                that.clearMenus()
-                that.displayClipboardToast()
-            }),
-            new Button('Powershell Interactive', function (event) {
-                copyStringToClipboard('kubectl exec ' + Pod.selected.name + ' -n ' + Pod.selected.namespace + ' -it -- powershell')
-                event.stopPropagation()
-                that.clearMenus()
-                that.displayClipboardToast()
-            }),
-            new Button('Bash Interactive', function (event) {
-                copyStringToClipboard('kubectl exec ' + Pod.selected.name + ' -n ' + Pod.selected.namespace + ' -it -- /bin/bash')
-                event.stopPropagation()
-                that.clearMenus()
-                that.displayClipboardToast()
-            }),
-            new Button('Top Pod', function (event) {
-                copyStringToClipboard('kubectl top pod ' + Pod.selected.name + ' -n ' + Pod.selected.namespace)
-                event.stopPropagation()
-                that.clearMenus()
-                that.displayClipboardToast()
-            })
-        ])
-
-        const menu = this.menu || new Menu([
-            new Button('Get >', function (event) {
-                that.showChildMenu(menu, getMenu, this.getGlobalPosition().y)
-                event.stopPropagation()
-            }),
-            new Button('Describe >', function (event) {
-                that.showChildMenu(menu, describeMenu, this.getGlobalPosition().y)
-                event.stopPropagation()
-            }),
-            new Button('Logs >', function (event) {
-                that.showChildMenu(menu, logsMenu, this.getGlobalPosition().y)
-                event.stopPropagation()
-            }),
-            new Button('Delete >', function (event) {
-                that.showChildMenu(menu, deleteMenu, this.getGlobalPosition().y)
-                event.stopPropagation()
-            }),
-            new Button('Manage >', function (event) {
-                that.showChildMenu(menu, manageMenu, this.getGlobalPosition().y)
-                event.stopPropagation()
-            })
-        ])
         menu.draw()
-        menu.visible = false
-        this.stage.addChild(menu)
         this.menu = menu
-        this.deleteMenu = deleteMenu
-        this.logsMenu = logsMenu
-        this.describeMenu = describeMenu
-        this.getMenu = getMenu
-        this.manageMenu = manageMenu
     }
 
     animatePodCreation(originalPod, globalPosition) {

@@ -1,22 +1,31 @@
 import App from './app'
+import Button from './button'
 
 const PIXI = require('pixi.js')
 
 export const MENU_VERTICAL_PADDING = 10
 export const MENU_HORIZONTAL_PADDING = 10
 
+export const ALL_MENUS = []
+
 export default class Menu extends PIXI.Graphics {
-    constructor(items) {
+    constructor(stage, parentMenu) {
         super()
-        this.items = items
+        this.items = []
+        this.parentMenu = parentMenu
+        this.visible = false
+        this.stage = stage
+        stage.addChild(this)
+        ALL_MENUS.push(this)
     }
 
     draw() {
+        const that = this
         this.removeChildren()
         this.clear()
         this.items.reduce((verticalPos, item) => {
             const element = item.draw()
-            this.addChild(element)
+            that.addChild(element)
             element.x = MENU_HORIZONTAL_PADDING
             element.y = verticalPos
             return verticalPos + element.height + MENU_VERTICAL_PADDING
@@ -27,7 +36,43 @@ export default class Menu extends PIXI.Graphics {
     }
 
     destroy() {
-        this.removeChildren()
         super.destroy()
+        this.stage.removeChild(this)
+        ALL_MENUS.splice(ALL_MENUS.indexOf(this), 1)
+    }
+
+    addButton(label, callback) {
+        this.items.push(new Button(label, callback))
+        return this
+    }
+
+    addSubMenu(label, buildMenu) {
+        const that = this
+        const subMenu = new Menu(this.stage, this)
+        buildMenu(subMenu)
+        this.addButton(label, function() {
+            that.showChildMenu(subMenu, this.getGlobalPosition().y)
+        })
+        return this
+    }
+
+    showChildMenu(childMenu, y) {
+        ALL_MENUS.forEach(menu => {
+            menu.visible = childMenu.isMeOrParent(menu)
+        })
+        childMenu.x = this.getGlobalPosition().x + this.width
+        childMenu.y = y
+    }
+
+    isMeOrParent(menu) {
+        if (menu === this) {
+            return true
+        }
+
+        if (this.parentMenu) {
+            return this.parentMenu.isMeOrParent(menu)
+        }
+
+        return false
     }
 }
