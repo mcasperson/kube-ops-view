@@ -32,7 +32,9 @@ export default class Toast extends PIXI.Graphics
     }
 
     destroy() {
-        this.parent.removeChild(this)
+        if (this.parent) {
+            this.parent.removeChild(this)
+        }
         PIXI.ticker.shared.remove(this.tick, this)
         super.destroy()
     }
@@ -58,8 +60,8 @@ export default class Toast extends PIXI.Graphics
         const textBoxWidth = TOAST_HORIZONTAL_PADDING + 8 * this.value.length
         const textBoxHeight = 12 + TOAST_VERTICAL_PADDING * 2
 
-        // draw a triangle
         toast.lineStyle(1, App.current.theme.primaryColor, 1)
+        toast.beginFill(App.current.theme.secondaryColor, 1)
         toast.drawRect(0, 0, textBoxWidth, textBoxHeight)
 
         toast.on('mouseover', toast.onBackOver.bind(this))

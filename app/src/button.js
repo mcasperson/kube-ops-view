@@ -13,16 +13,6 @@ export default class Button extends PIXI.Graphics
 
         this.value = value
         this.onClick = onClick
-
-        this.text = new PIXI.Text(this.value, {
-            fontFamily: 'ShareTechMono',
-            fontSize: 14,
-            fill: App.current.theme.primaryColor,
-            align: 'center'
-        })
-        this.text.x = 5
-        this.text.y = 5
-        this.addChild(this.text)
     }
 
     onBackOver() {
@@ -35,6 +25,18 @@ export default class Button extends PIXI.Graphics
 
     draw() {
         const button = this
+        this.removeChildren()
+        this.clear()
+
+        this.text = new PIXI.Text(this.value, {
+            fontFamily: 'ShareTechMono',
+            fontSize: 14,
+            fill: App.current.theme.primaryColor,
+            align: 'center'
+        })
+        this.text.x = 5
+        this.text.y = 5
+        this.addChild(this.text)
 
         // FIXME: hardcoded value for average char width..
         const textBoxWidth = 7 + 8 * this.value.length

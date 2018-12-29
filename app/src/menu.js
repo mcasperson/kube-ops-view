@@ -9,13 +9,11 @@ export const MENU_HORIZONTAL_PADDING = 10
 export const ALL_MENUS = []
 
 export default class Menu extends PIXI.Graphics {
-    constructor(stage, parentMenu) {
+    constructor(parentMenu) {
         super()
         this.items = []
         this.parentMenu = parentMenu
         this.visible = false
-        this.stage = stage
-        stage.addChild(this)
         ALL_MENUS.push(this)
     }
 
@@ -37,7 +35,9 @@ export default class Menu extends PIXI.Graphics {
 
     destroy() {
         super.destroy()
-        this.stage.removeChild(this)
+        if (this.parent) {
+            this.parent.removeChild(this)
+        }
         ALL_MENUS.splice(ALL_MENUS.indexOf(this), 1)
     }
 
@@ -48,7 +48,7 @@ export default class Menu extends PIXI.Graphics {
 
     addSubMenu(label, buildMenu) {
         const that = this
-        const subMenu = new Menu(this.stage, this)
+        const subMenu = new Menu(this)
         buildMenu(subMenu)
         this.addButton(label, function() {
             subMenu.showMenu(

@@ -437,6 +437,7 @@ export default class App {
 
     initMenus() {
         ALL_MENUS.forEach(menu => {
+            this.stage.addChild(menu)
             menu.draw()
             menu.visible = false
         })
@@ -461,7 +462,7 @@ export default class App {
     buildNodeMenu() {
         const that = this
 
-        const nodeMenu = this.nodeMenu || new Menu(this.stage)
+        const nodeMenu = this.nodeMenu || new Menu()
             .addSubMenu('Get >', function(subMenu) {
                 subMenu
                     .addButton(
@@ -505,7 +506,7 @@ export default class App {
     buildPodMenu() {
         const that = this
 
-        const menu = this.menu || new Menu(this.stage)
+        const menu = this.menu || new Menu()
             .addSubMenu('Get >', function (subMenu) {
                 subMenu
                     .addButton(
