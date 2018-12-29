@@ -8,13 +8,14 @@ const CLUSTER_ZOOM = 1
 const NODE_ZOOM = 4
 
 export default class Cluster extends PIXI.Graphics {
-    constructor (cluster, status, tooltip, menu, nodeMenu, zoomInto) {
+    constructor (cluster, status, tooltip, menu, nodeMenu, clusterMenu, zoomInto) {
         super()
         this.cluster = cluster
         this.status = status
         this.tooltip = tooltip
         this.menu = menu
         this.nodeMenu = nodeMenu
+        this.clusterMenu = clusterMenu
         this.zoomInto = zoomInto
         this.interactive = true
         const that = this
@@ -134,6 +135,14 @@ export default class Cluster extends PIXI.Graphics {
         text.y = 2
         topHandle.addChild(text)
         this.addChild(topHandle)
+
+        topHandle.on('rightdown', function(event) {
+            Cluster.selected = that.cluster
+            that.clusterMenu.x = event.data.global.x
+            that.clusterMenu.y = event.data.global.y
+            that.clusterMenu.visible = true
+            event.stopPropagation()
+        })
 
         let newTick = null
         const nowSeconds = Date.now() / 1000

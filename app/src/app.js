@@ -424,6 +424,7 @@ export default class App {
         this.buildTooltip()
         this.buildPodMenu()
         this.buildNodeMenu()
+        this.buildClusterMenu()
         this.initMenus()
     }
 
@@ -472,6 +473,24 @@ export default class App {
             that.clearMenus()
             that.displayClipboardToast()
         }
+    }
+
+    buildClusterMenu() {
+        const that = this
+
+        const clusterMenu = this.clusterMenu || new Menu()
+            .addSubMenu('Manage >', function(subMenu) {
+                subMenu
+                    .addButton(
+                        'Cluster Info',
+                        that.copyCommandToClipboard(
+                            () => 'kubectl cluster-info'))
+                    .addButton(
+                        'Cluster Info Dump',
+                        that.copyCommandToClipboard(
+                            () =>'kubectl cluster-info dump'))
+            })
+        this.clusterMenu = clusterMenu
     }
 
     buildNodeMenu() {
@@ -707,7 +726,14 @@ export default class App {
                 const status = this.clusterStatuses.get(cluster.id)
                 let clusterBox = clusterComponentById[cluster.id]
                 if (!clusterBox) {
-                    clusterBox = new Cluster(cluster, status, this.tooltip, this.menu, this.nodeMenu, this.zoomInto.bind(this))
+                    clusterBox = new Cluster(
+                        cluster,
+                        status,
+                        this.tooltip,
+                        this.menu,
+                        this.nodeMenu,
+                        this.clusterMenu,
+                        this.zoomInto.bind(this))
                     this.viewContainer.addChild(clusterBox)
                 } else {
                     clusterBox.cluster = cluster
