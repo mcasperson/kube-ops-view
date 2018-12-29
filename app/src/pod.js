@@ -161,8 +161,6 @@ export class Pod extends PIXI.Graphics {
         const allRunning = running >= this.pod.containers.length
         const resources = this.getResourceUsage()
 
-        let newTick = null
-
         const podBox = this
         podBox.interactive = true
 
@@ -171,14 +169,18 @@ export class Pod extends PIXI.Graphics {
         podBox.on('mouseover', function () {
             podBox.filters = podBox.filters.filter(x => x != BRIGHTNESS_FILTER).concat([BRIGHTNESS_FILTER])
             let s = this.pod.name
-            s += '\nNamespace : ' + this.pod.namespace
-            s += '\nStatus    : ' + this.pod.phase + ' (' + ready + '/' + this.pod.containers.length + ' ready)'
-            s += '\nStart Time: ' + this.pod.startTime
-            s += '\nLabels    :'
+            s += '\nNamespace  : ' + this.pod.namespace
+            s += '\nStatus     : ' + this.pod.phase + ' (' + ready + '/' + this.pod.containers.length + ' ready)'
+            s += '\nStart Time : ' + this.pod.startTime
+            s += '\nLabels     :'
             for (var key of Object.keys(this.pod.labels).sort()) {
                 if (key !== 'pod-template-hash') {
                     s += '\n  ' + key + ': ' + this.pod.labels[key]
                 }
+            }
+            s += '\nAnnotations:'
+            for (var annotation of Object.keys(this.pod.annotations).sort()) {
+                s += '\n  ' + annotation + ': ' + this.pod.annotations[annotation]
             }
             s += '\nContainers:'
             for (const container of this.pod.containers) {
@@ -217,26 +219,12 @@ export class Pod extends PIXI.Graphics {
         for (let i = 0; i < this.pod.containers.length; i++) {
             podBox.drawRect(i * w, 0, w, 10)
         }
-        let color
-        if (this.pod.phase == 'Succeeded') {
-            // completed Job
-            color = 0xaaaaff
-        } else if (this.pod.phase == 'Running' && allReady) {
-            color = 0xaaffaa
-        } else if (this.pod.phase == 'Running' && allRunning && !allReady) {
-            // all containers running, but some not ready (readinessProbe)
-            newTick = this.pulsate
-            color = 0xaaffaa
-        } else if (this.pod.phase == 'Pending') {
-            newTick = this.pulsate
-            color = 0xffffaa
-        } else {
-            // CrashLoopBackOff, ImagePullBackOff or other unknown state
-            newTick = this.crashing
-            color = 0xffaaaa
-        }
-        podBox.lineStyle(2, color, 1)
-        podBox.beginFill(color, 0.2)
+
+        //const view = this.standardPodSummary(allReady, allRunning)
+        const view = this.numericPodSummary('ui-test-avg')
+
+        podBox.lineStyle(2, view.color, 1)
+        podBox.beginFill(view.color, 0.2)
         podBox.drawRect(0, 0, 10, 10)
         if (this.pod.deleted) {
             if (!this.cross) {
@@ -254,7 +242,7 @@ export class Pod extends PIXI.Graphics {
                 this.addChild(cross)
                 this.cross = cross
             }
-            newTick = this.terminating
+            view.newTick = this.terminating
         }
 
         if (restarts) {
@@ -265,12 +253,12 @@ export class Pod extends PIXI.Graphics {
             }
         }
 
-        if (newTick && newTick != this.tick) {
-            this.tick = newTick
+        if (view.newTick && view.newTick != this.tick) {
+            this.tick = view.newTick
             // important: only register new listener if it does not exist yet!
             // (otherwise we leak listeners)
             PIXI.ticker.shared.add(this.tick, this)
-        } else if (!newTick && this.tick) {
+        } else if (!view.newTick && this.tick) {
             PIXI.ticker.shared.remove(this.tick, this)
             this.tick = null
             this.alpha = this._progress
@@ -300,6 +288,57 @@ export class Pod extends PIXI.Graphics {
         podBox.endFill()
 
         return this
+    }
+
+    standardPodSummary(allReady, allRunning) {
+        if (this.pod.phase == 'Succeeded') {
+            // completed Job
+            return {color: 0xaaaaff}
+        } else if (this.pod.phase == 'Running' && allReady) {
+            return {color: 0xaaffaa}
+        } else if (this.pod.phase == 'Running' && allRunning && !allReady) {
+            // all containers running, but some not ready (readinessProbe)
+            return {newTick: this.pulsate, color: 0xaaffaa}
+        } else if (this.pod.phase == 'Pending') {
+            return {newTick: this.pulsate, color: 0xffffaa}
+        } else {
+            // CrashLoopBackOff, ImagePullBackOff or other unknown state
+            return {newTick: this.crashing, color: 0xffaaaa}
+        }
+    }
+
+    numericPodSummary(field) {
+        // make sure this annotation is available on every pod, set to null if it is missing
+        Object.values(ALL_PODS).forEach(current => {
+            current.pod.kovmetadata = current.pod.kovmetadata || []
+            current.pod.kovmetadata[field] = current.pod.kovmetadata[field] || null
+        })
+
+        const range = Object.values(ALL_PODS).reduce((memo, current) => {
+            if (!memo) {
+                return {min: Number(current.pod.kovmetadata[field]) || 0, max: Number(current.pod.kovmetadata[field]) || 0}
+            }
+
+            if (current.pod.kovmetadata[field]) {
+                if (Number(current.pod.kovmetadata[field]) < memo.min) {
+                    return {min: Number(current.pod.kovmetadata[field]), max: memo.max}
+                }
+
+                if (Number(current.pod.kovmetadata[field]) > memo.min) {
+                    return {min: memo.min, max: Number(current.pod.kovmetadata[field])}
+                }
+            }
+
+            return memo
+        }, null)
+
+        if (!this.pod.kovmetadata[field]) {
+            return {color: 0xC0C0C0}
+        }
+
+        const normalizedRange = range.max - range.min
+        const color = normalizedRange === 0 ? 0 : ((Number(this.pod.kovmetadata[field]) || range.min) - range.min) / normalizedRange
+        return {color: PIXI.utils.rgb2hex([1 - color, color, 0])}
     }
 
     podMenu() {

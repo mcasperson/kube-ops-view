@@ -192,6 +192,7 @@ export default class App {
                     prevY = event.clientY
                     isDragging = true
                     this.renderer.view.style.cursor = 'move'
+                    this.clearMenus()
                 }
             }
             App.stopGlobalEvents = false
@@ -212,8 +213,6 @@ export default class App {
                 this.viewContainerTargetPosition.y = this.viewContainer.y
                 prevX = event.clientX
                 prevY = event.clientY
-
-                this.clearMenus()
             }
             App.stopGlobalEvents = false
         }
