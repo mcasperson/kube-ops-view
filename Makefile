@@ -29,7 +29,11 @@ push: docker
 mock:
 	docker run $(TTYFLAGS) -p 8080:8080 "$(IMAGE):$(TAG)" --mock
 
-heroku:
+heroku: appjs
+    # Log into Heroku first.
+    heroku container:login
+    # Link to the existing app. Alternatively use "heroku create" to create a new app.
+    heroku git:remote -a evening-fjord-52184
 	mv Dockerfile Dockerfile-Original
 	cp Dockerfile-Heroku Dockerfile
 	heroku container:push web
