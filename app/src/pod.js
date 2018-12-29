@@ -182,6 +182,10 @@ export class Pod extends PIXI.Graphics {
             for (var annotation of Object.keys(this.pod.annotations).sort()) {
                 s += '\n  ' + annotation + ': ' + this.pod.annotations[annotation]
             }
+            s += '\nKOV Metadata:'
+            for (var meta of Object.keys(this.pod.kovmetadata).sort()) {
+                s += '\n  ' + meta + ': ' + this.pod.kovmetadata[meta]
+            }
             s += '\nContainers:'
             for (const container of this.pod.containers) {
                 s += '\n  ' + container.name + ': '
@@ -312,33 +316,45 @@ export class Pod extends PIXI.Graphics {
         Object.values(ALL_PODS).forEach(current => {
             current.pod.kovmetadata = current.pod.kovmetadata || []
             current.pod.kovmetadata[field] = current.pod.kovmetadata[field] || null
+            current.pod.kovmetadata[field + '.meta'] = current.pod.kovmetadata[field + '.meta'] || null
         })
-
-        const range = Object.values(ALL_PODS).reduce((memo, current) => {
-            if (!memo) {
-                return {min: Number(current.pod.kovmetadata[field]) || 0, max: Number(current.pod.kovmetadata[field]) || 0}
-            }
-
-            if (current.pod.kovmetadata[field]) {
-                if (Number(current.pod.kovmetadata[field]) < memo.min) {
-                    return {min: Number(current.pod.kovmetadata[field]), max: memo.max}
-                }
-
-                if (Number(current.pod.kovmetadata[field]) > memo.min) {
-                    return {min: memo.min, max: Number(current.pod.kovmetadata[field])}
-                }
-            }
-
-            return memo
-        }, null)
 
         if (!this.pod.kovmetadata[field]) {
             return {color: 0xC0C0C0}
         }
 
-        const normalizedRange = range.max - range.min
-        const color = normalizedRange === 0 ? 0 : ((Number(this.pod.kovmetadata[field]) || range.min) - range.min) / normalizedRange
-        return {color: PIXI.utils.rgb2hex([1 - color, color, 0])}
+        if (this.pod.kovmetadata[field + '.meta']) {
+            const metaJson = JSON.parse(this.pod.kovmetadata[field + '.meta'])
+            const smallPreference = metaJson.preference === 'small'
+            const normalizedRange = metaJson.max - metaJson.min
+            const color = normalizedRange === 0 ? 0 : ((Number(this.pod.kovmetadata[field]) || metaJson.min) - metaJson.min) / normalizedRange
+            return {color: PIXI.utils.rgb2hex([smallPreference ? color : 1 - color, smallPreference ? 1 - color : color, 0])}
+        } else {
+            const range = Object.values(ALL_PODS).reduce((memo, current) => {
+                if (!memo) {
+                    return {
+                        min: Number(current.pod.kovmetadata[field]) || 0,
+                        max: Number(current.pod.kovmetadata[field]) || 0
+                    }
+                }
+
+                if (current.pod.kovmetadata[field]) {
+                    if (Number(current.pod.kovmetadata[field]) < memo.min) {
+                        return {min: Number(current.pod.kovmetadata[field]), max: memo.max}
+                    }
+
+                    if (Number(current.pod.kovmetadata[field]) > memo.min) {
+                        return {min: memo.min, max: Number(current.pod.kovmetadata[field])}
+                    }
+                }
+
+                return memo
+            }, null)
+
+            const normalizedRange = range.max - range.min
+            const color = normalizedRange === 0 ? 0 : ((Number(this.pod.kovmetadata[field]) || range.min) - range.min) / normalizedRange
+            return {color: PIXI.utils.rgb2hex([1 - color, color, 0])}
+        }
     }
 
     podMenu() {
