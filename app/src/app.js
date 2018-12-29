@@ -611,20 +611,14 @@ export default class App {
             .addSubMenu('Delete >', function (subMenu) {
                 subMenu
                     .addButton('Delete Pod', that.copyCommandToClipboard(
-                        function () {
-                            'kubectl delete pod ' + Pod.selected.name + ' -n ' + Pod.selected.namespace
-                        }))
+                        () => 'kubectl delete pod ' + Pod.selected.name + ' -n ' + Pod.selected.namespace))
             })
             .addSubMenu('Label & Annotate >', function (subMenu) {
                 subMenu
                     .addButton('Label Pod', that.copyCommandToClipboard(
-                        function () {
-                            'kubectl label pods ' + Pod.selected.name + ' -n ' + Pod.selected.namespace + ' label-name=label-value'
-                        }))
+                        () => 'kubectl label pods ' + Pod.selected.name + ' -n ' + Pod.selected.namespace + ' label-name=label-value'))
                     .addButton('Annotate Pod', that.copyCommandToClipboard(
-                        function () {
-                            'kubectl annotate pods ' + Pod.selected.name + ' -n ' + Pod.selected.namespace + ' annotation-name=annotation-value'
-                        }))
+                        () => 'kubectl annotate pods ' + Pod.selected.name + ' -n ' + Pod.selected.namespace + ' annotation-name=annotation-value'))
             })
             .addSubMenu('Manage >', function (subMenu) {
                 subMenu
@@ -656,13 +650,9 @@ export default class App {
             .addSubMenu('Copy >', function (subMenu) {
                 subMenu
                     .addButton('Copy From Pod', that.copyCommandToClipboard(
-                        function () {
-                            'kubectl cp ' + Pod.selected.namespace + '/' + Pod.selected.name + ':/a/file/in/the/pod /some/local/file'
-                        }))
+                        () => 'kubectl cp ' + Pod.selected.namespace + '/' + Pod.selected.name + ':/a/file/in/the/pod /some/local/file'))
                     .addButton('Copy Into Pod', that.copyCommandToClipboard(
-                        function () {
-                            'kubectl cp /some/local/file ' + Pod.selected.namespace + '/' + Pod.selected.name + ':/a/file/in/the/pod'
-                        }))
+                        () => 'kubectl cp /some/local/file ' + Pod.selected.namespace + '/' + Pod.selected.name + ':/a/file/in/the/pod'))
             })
         this.menu = menu
     }
