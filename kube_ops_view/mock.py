@@ -23,6 +23,13 @@ def generate_mock_pod(index: int, i: int, j: int):
         'env': ['prod', 'dev'],
         'owner': ['x-wing', 'iris']
     }
+    annotations = {
+        'somevalue': ['annotation1', 'annotation2']
+    }
+    kovmetadata = {
+        'ui-test-avg': ['1', '2', '3', '4', '5'],
+        'ui-test-avg.meta': ['{"max":5, "min":1, "preference":"small"}']
+    }
     pod_phases = ['Pending', 'Running', 'Running', 'Failed']
 
     pod_labels = {}
@@ -31,6 +38,20 @@ def generate_mock_pod(index: int, i: int, j: int):
         label_choice = hash_int((index + 1) * (i + 1) * (j + 1) * (li + 1)) % (len(v) + 1)
         if(label_choice != 0):
             pod_labels[k] = v[label_choice - 1]
+
+    pod_annotations = {}
+    for li, k in enumerate(annotations):
+        v = annotations[k]
+        annotation_choice = hash_int((index + 1) * (i + 1) * (j + 1) * (li + 1)) % (len(v) + 1)
+        if(annotation_choice != 0):
+            pod_annotations[k] = v[annotation_choice - 1]
+
+    pod_kovmetadata = {}
+    for li, k in enumerate(kovmetadata):
+        v = kovmetadata[k]
+        kovmetadata_choice = hash_int((index + 1) * (i + 1) * (j + 1) * (li + 1)) % (len(v) + 1)
+        if(kovmetadata_choice != 0):
+            pod_kovmetadata[k] = v[kovmetadata_choice - 1]
 
     phase = pod_phases[hash_int((index + 1) * (i + 1) * (j + 1)) % len(pod_phases)]
     containers = []
@@ -53,8 +74,10 @@ def generate_mock_pod(index: int, i: int, j: int):
         'name': '{}-{}-{}'.format(names[hash_int((i + 1) * (j + 1)) % len(names)], i, j),
         'namespace': 'kube-system' if j < 3 else 'default',
         'labels': pod_labels,
+        'annotations': pod_annotations,
         'phase': phase,
-        'containers': containers
+        'containers': containers,
+        'kovmetadata': pod_kovmetadata
     }
     if phase == 'Running' and j % 17 == 0:
         pod['deleted'] = 123

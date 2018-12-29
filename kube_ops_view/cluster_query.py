@@ -24,6 +24,7 @@ def map_node(node: dict):
     return {
         'name': node['metadata']['name'],
         'labels': node['metadata']['labels'],
+        'annotations': node['metadata']['annotations'],
         'status': map_node_status(node['status']),
         'pods': {}
     }
@@ -34,6 +35,7 @@ def map_pod(pod: dict):
         'name': pod['metadata']['name'],
         'namespace': pod['metadata']['namespace'],
         'labels': pod['metadata'].get('labels', {}),
+        'annotations': pod['metadata']['annotations'],
         'phase': pod['status'].get('phase'),
         'startTime': pod['status']['startTime'] if 'startTime' in pod['status'] else '',
         'containers': []
@@ -99,6 +101,10 @@ def query_kubernetes_cluster(cluster):
             nodes[pod['spec']['nodeName']]['pods'][pod_key] = obj
         else:
             unassigned_pods[pod_key] = obj
+        if obj.get('annotations') and obj.get('annotations').get('kov/metadata'):
+            response = request(cluster, '/api/v1/namespaces/' + obj['namespace'] + '/configmaps/' + obj['annotations']['kov/metadata'])
+            response.raise_for_status()
+            obj['kovmetadata'] = response.json()['data']
 
     try:
         response = request(cluster, '/apis/metrics.k8s.io/v1beta1/nodes')

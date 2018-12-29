@@ -312,6 +312,8 @@ export class Pod extends PIXI.Graphics {
     }
 
     numericPodSummary(field) {
+        const maxColor = 0.4
+
         // make sure this annotation is available on every pod, set to null if it is missing
         Object.values(ALL_PODS).forEach(current => {
             current.pod.kovmetadata = current.pod.kovmetadata || []
@@ -327,8 +329,10 @@ export class Pod extends PIXI.Graphics {
             const metaJson = JSON.parse(this.pod.kovmetadata[field + '.meta'])
             const smallPreference = metaJson.preference === 'small'
             const normalizedRange = metaJson.max - metaJson.min
-            const color = normalizedRange === 0 ? 0 : Math.min((Number(this.pod.kovmetadata[field]) || metaJson.min) - metaJson.min / normalizedRange, 1)
-            return {color: PIXI.utils.rgb2hex([smallPreference ? color : 1 - color, smallPreference ? 1 - color : color, 0])}
+            const color = normalizedRange === 0 ? 0 : Math.max(Math.min(((Number(this.pod.kovmetadata[field]) || metaJson.min) - metaJson.min) / normalizedRange, 1), 0)
+            const bigColor = maxColor - color * maxColor
+            const smallColor = color * maxColor
+            return {color: PIXI.utils.rgb2hex([smallPreference ? smallColor : bigColor, smallPreference ? bigColor : smallColor, 0])}
         } else {
             const range = Object.values(ALL_PODS).reduce((memo, current) => {
                 if (!memo) {
@@ -353,7 +357,7 @@ export class Pod extends PIXI.Graphics {
 
             const normalizedRange = range.max - range.min
             const color = normalizedRange === 0 ? 0 : ((Number(this.pod.kovmetadata[field]) || range.min) - range.min) / normalizedRange
-            return {color: PIXI.utils.rgb2hex([1 - color, color, 0])}
+            return {color: PIXI.utils.rgb2hex([maxColor - color * maxColor, color * maxColor, 0])}
         }
     }
 
