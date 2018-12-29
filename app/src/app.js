@@ -507,7 +507,7 @@ export default class App {
                     .addButton(
                         'Run Container',
                         that.copyCommandToClipboard(
-                            () => 'kubectl run --image=<image> <name> --port=<port> --env="<environment variable name>=<environment variable value>'))
+                            () => 'kubectl run --image=<image> <name> --port=<port> --env="<environment variable name>=<environment variable value>"'))
                     .addButton(
                         'Expose Container',
                         that.copyCommandToClipboard(
