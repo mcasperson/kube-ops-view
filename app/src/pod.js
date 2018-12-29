@@ -2,6 +2,7 @@ import {MENU_HORIZONTAL_PADDING} from './menu'
 import App from './app.js'
 import {FACTORS, getBarColor, podResource} from './utils.js'
 import {BRIGHTNESS_FILTER} from './filters.js'
+import {HSVtoRGB} from './utils'
 
 const PIXI = require('pixi.js')
 
@@ -312,7 +313,7 @@ export class Pod extends PIXI.Graphics {
     }
 
     numericPodSummary(field) {
-        const maxColor = 0.4
+        const maxHue = 1 / 3.5
 
         // make sure this annotation is available on every pod, set to null if it is missing
         Object.values(ALL_PODS).forEach(current => {
@@ -330,9 +331,7 @@ export class Pod extends PIXI.Graphics {
             const smallPreference = metaJson.preference === 'small'
             const normalizedRange = metaJson.max - metaJson.min
             const color = normalizedRange === 0 ? 0 : Math.max(Math.min(((Number(this.pod.kovmetadata[field]) || metaJson.min) - metaJson.min) / normalizedRange, 1), 0)
-            const bigColor = maxColor - color * maxColor
-            const smallColor = color * maxColor
-            return {color: PIXI.utils.rgb2hex([smallPreference ? smallColor : bigColor, smallPreference ? bigColor : smallColor, 0])}
+            return {color: PIXI.utils.rgb2hex(HSVtoRGB(color * maxHue, 1, 1))}
         } else {
             const range = Object.values(ALL_PODS).reduce((memo, current) => {
                 if (!memo) {
@@ -357,7 +356,7 @@ export class Pod extends PIXI.Graphics {
 
             const normalizedRange = range.max - range.min
             const color = normalizedRange === 0 ? 0 : ((Number(this.pod.kovmetadata[field]) || range.min) - range.min) / normalizedRange
-            return {color: PIXI.utils.rgb2hex([maxColor - color * maxColor, color * maxColor, 0])}
+            return {color: PIXI.utils.rgb2hex(HSVtoRGB(color * maxHue, 1, 1))}
         }
     }
 
