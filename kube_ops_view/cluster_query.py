@@ -107,7 +107,7 @@ def query_kubernetes_cluster(cluster):
                 response = request(cluster, '/api/v1/namespaces/' + obj['namespace'] + '/configmaps/' + obj['annotations']['kov/metadata'])
                 response.raise_for_status()
                 obj['kovmetadata'] = response.json()['data']
-        except Exception as e:
+        except Exception:
             pass
 
     try:
