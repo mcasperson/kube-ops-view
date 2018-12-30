@@ -338,8 +338,17 @@ export class Pod extends PIXI.Graphics {
             try {
                 const metaJson = JSON.parse(this.pod.kovmetadata[field + '.meta'])
                 const smallPreference = metaJson.preference === 'small'
-                const normalizedRange = metaJson.max - metaJson.min
-                const color = normalizedRange === 0 ? 0 : Math.max(Math.min(((Number(this.pod.kovmetadata[field]) || metaJson.min) - metaJson.min) / normalizedRange, 1), 0)
+                const nowEpoch = Math.round((new Date()).getTime() / 1000)
+                const max = metaJson.maxrel !== undefined
+                    ? metaJson.maxrel + nowEpoch
+                    : metaJson.max
+                const min = metaJson.minrel !== undefined
+                    ? metaJson.minrel + nowEpoch
+                    : metaJson.min
+                const normalizedRange = max - min
+                const color = normalizedRange === 0
+                    ? 0
+                    : Math.max(Math.min(((Number(this.pod.kovmetadata[field]) || min) - min) / normalizedRange, 1), 0)
                 return {color: PIXI.utils.rgb2hex(HSVtoRGB(smallPreference ? maxHue - color * maxHue : color * maxHue, 1, 1))}
             } catch (e) {
                 // probably bad json, so fall back to not using any metadata

@@ -423,7 +423,7 @@ export default class App {
             that.overlay = value
             that.update()
         })
-        overlayOptions.x = 650
+        overlayOptions.x = 580
         overlayOptions.y = 3
         this.menuBar.addChild(overlayOptions.draw())
         this.overlayOptions = overlayOptions
@@ -434,7 +434,7 @@ export default class App {
             this.draw()
             this.update()
         })
-        resetButton.x = 730
+        resetButton.x = 780
         resetButton.y = 3
         menuBar.addChild(resetButton.draw())
     }
