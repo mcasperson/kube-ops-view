@@ -25,6 +25,7 @@ export default class App {
         this.selectedClusters = new Set((params.get('clusters') || '').split(',').filter(x => x))
         this.seenPods = new Set()
         this.sorterFn = ''
+        this.overlay = 'default'
         this.theme = Theme.get(localStorage.getItem('theme'))
         this.eventSource = null
         this.connectTime = null
@@ -320,11 +321,12 @@ export default class App {
     }
 
     drawMenuBar() {
-        const menuBar = this.createMenuBar()
-        this.drawResetButton(menuBar)
+        this.menuBar = this.createMenuBar()
+        this.drawResetButton(this.menuBar)
         this.drawSearch()
-        this.drawSort(menuBar)
-        this.drawTheme(menuBar)
+        this.drawSort(this.menuBar)
+        this.drawTheme()
+        this.drawOverlay()
     }
 
     createMenuBar() {
@@ -340,7 +342,7 @@ export default class App {
         return menuBar
     }
 
-    drawTheme(menuBar) {
+    drawTheme() {
         const themeOptions = Object.keys(ALL_THEMES).sort().map(name => {
             return {text: name.toUpperCase(), value: name}
         })
@@ -350,10 +352,10 @@ export default class App {
         })
         themeSelector.x = 420
         themeSelector.y = 3
-        menuBar.addChild(themeSelector.draw())
+        this.menuBar.addChild(themeSelector.draw())
     }
 
-    drawSort(menuBar) {
+    drawSort() {
         const items = [
             {
                 text: 'SORT: NAME', value: sortByName
@@ -376,7 +378,7 @@ export default class App {
         })
         selectBox.x = 265
         selectBox.y = 3
-        menuBar.addChild(selectBox.draw())
+        this.menuBar.addChild(selectBox.draw())
     }
 
     drawSearch() {
@@ -400,12 +402,41 @@ export default class App {
         this.searchText = searchText
     }
 
+    drawOverlay() {
+        const that = this
+        PIXI.ticker.shared.add(function (_) {
+            if (that.overlayOptions) {
+                that.overlayOptions.destroy()
+            }
+
+            const items = Object.values(ALL_PODS)
+                .flatMap(current => current.pod && current.pod.kovmetadata && Object.keys(current.pod.kovmetadata) || [])
+                .filter(meta => !meta.endsWith('.meta'))
+                .filter((v, i, a) => a.indexOf(v) === i)
+            items.push('default')
+
+            const selectBoxItems = items.map(i => {
+                return {text: i, value: i}
+            })
+
+            //setting default sort
+            const overlayOptions = new SelectBox(selectBoxItems, that.overlay, function (value) {
+                that.overlay = value
+                that.update()
+            })
+            overlayOptions.x = 580
+            overlayOptions.y = 3
+            that.menuBar.addChild(overlayOptions.draw())
+            that.overlayOptions = overlayOptions
+        })
+    }
+
     drawResetButton(menuBar) {
         const resetButton = new Button('RESET', () => {
             this.draw()
             this.update()
         })
-        resetButton.x = 570
+        resetButton.x = 730
         resetButton.y = 3
         menuBar.addChild(resetButton.draw())
     }

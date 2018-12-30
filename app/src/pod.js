@@ -225,8 +225,9 @@ export class Pod extends PIXI.Graphics {
             podBox.drawRect(i * w, 0, w, 10)
         }
 
-        //const view = this.standardPodSummary(allReady, allRunning)
-        const view = this.numericPodSummary('ui-test-avg')
+        const view = App.current.overlay === 'default'
+            ? this.standardPodSummary(allReady, allRunning)
+            : this.numericPodSummary(App.current.overlay)
 
         podBox.lineStyle(2, view.color, 1)
         podBox.beginFill(view.color, 0.2)
