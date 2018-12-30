@@ -16,6 +16,16 @@ spec:
         application: kube-ops-view-redis
         version: v0.0.1
     spec:
+      serviceAccount: kube-ops-view
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+              - matchExpressions:
+                  - key: beta.kubernetes.io/os
+                    operator: In
+                    values:
+                      - "linux"
       containers:
       - name: redis
         image: redis:3.2-alpine
