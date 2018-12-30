@@ -10,11 +10,11 @@ metadata:
   name: kube-ops-view
 rules:
 - apiGroups: [""]
-  resources: ["nodes", "pods"]
+  resources: ["nodes", "pods", "configmaps"]
   verbs:
     - list
 - apiGroups: ["metrics.k8s.io"]
-  resources: ["nodes", "pods"]
+  resources: ["nodes", "pods", "configmaps"]
   verbs:
     - get
     - list
