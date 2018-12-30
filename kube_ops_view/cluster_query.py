@@ -101,10 +101,14 @@ def query_kubernetes_cluster(cluster):
             nodes[pod['spec']['nodeName']]['pods'][pod_key] = obj
         else:
             unassigned_pods[pod_key] = obj
-        if obj.get('annotations') and obj.get('annotations').get('kov/metadata'):
-            response = request(cluster, '/api/v1/namespaces/' + obj['namespace'] + '/configmaps/' + obj['annotations']['kov/metadata'])
-            response.raise_for_status()
-            obj['kovmetadata'] = response.json()['data']
+
+        try:
+            if obj.get('annotations') and obj.get('annotations').get('kov/metadata'):
+                response = request(cluster, '/api/v1/namespaces/' + obj['namespace'] + '/configmaps/' + obj['annotations']['kov/metadata'])
+                response.raise_for_status()
+                obj['kovmetadata'] = response.json()['data']
+        except Exception as e:
+            logger.warning('Failed to query pod metadata configmap')
 
     try:
         response = request(cluster, '/apis/metrics.k8s.io/v1beta1/nodes')
