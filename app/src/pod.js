@@ -319,18 +319,21 @@ export class Pod extends PIXI.Graphics {
         // make sure this annotation is available on every pod, set to null if it is missing
         Object.values(ALL_PODS).forEach(current => {
             current.pod.kovmetadata = current.pod.kovmetadata || []
-            current.pod.kovmetadata[field] = current.pod.kovmetadata[field] || null
-            current.pod.kovmetadata[field + '.meta'] = current.pod.kovmetadata[field + '.meta'] || null
         })
+
+        if (this.pod.kovmetadata[field] === undefined) {
+            return {color: 0x0000FF}
+        }
 
         if (!this.pod.kovmetadata[field]) {
             return {color: 0xC0C0C0}
         }
 
+
         // Attempt to display the overlay based on the hard coded ranges
         if (this.pod.kovmetadata[field + '.meta']) {
             try {
-                const metaJson = JSON.parse(this.pod.kovmetadata[field + '.meta'])
+                const metaJson = JSON.parse('{"max":5, "min":1, "preference":"small"}') //JSON.parse(this.pod.kovmetadata[field + '.meta'])
                 const smallPreference = metaJson.preference === 'small'
                 const normalizedRange = metaJson.max - metaJson.min
                 const color = normalizedRange === 0 ? 0 : Math.max(Math.min(((Number(this.pod.kovmetadata[field]) || metaJson.min) - metaJson.min) / normalizedRange, 1), 0)

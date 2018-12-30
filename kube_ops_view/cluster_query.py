@@ -108,7 +108,7 @@ def query_kubernetes_cluster(cluster):
                 response.raise_for_status()
                 obj['kovmetadata'] = response.json()['data']
         except Exception as e:
-            logger.warning('Failed to query pod metadata configmap')
+            pass
 
     try:
         response = request(cluster, '/apis/metrics.k8s.io/v1beta1/nodes')
