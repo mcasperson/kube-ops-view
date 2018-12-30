@@ -184,8 +184,10 @@ export class Pod extends PIXI.Graphics {
                 s += '\n  ' + annotation + ': ' + this.pod.annotations[annotation]
             }
             s += '\nKOV Metadata:'
-            for (var meta of Object.keys(this.pod.kovmetadata).sort()) {
-                s += '\n  ' + meta + ': ' + this.pod.kovmetadata[meta]
+            if (this.pod.kovmetadata) {
+                for (var meta of Object.keys(this.pod.kovmetadata).sort()) {
+                    s += '\n  ' + meta + ': ' + this.pod.kovmetadata[meta]
+                }
             }
             s += '\nContainers:'
             for (const container of this.pod.containers) {
