@@ -35,7 +35,7 @@ def map_pod(pod: dict):
         'name': pod['metadata']['name'],
         'namespace': pod['metadata']['namespace'],
         'labels': pod['metadata'].get('labels', {}),
-        'annotations': pod['metadata']['annotations'],
+        'annotations': pod['metadata'].get('annotations', {}),
         'phase': pod['status'].get('phase'),
         'startTime': pod['status']['startTime'] if 'startTime' in pod['status'] else '',
         'containers': []

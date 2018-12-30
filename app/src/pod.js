@@ -327,38 +327,44 @@ export class Pod extends PIXI.Graphics {
             return {color: 0xC0C0C0}
         }
 
+        // Attempt to display the overlay based on the hard coded ranges
         if (this.pod.kovmetadata[field + '.meta']) {
-            const metaJson = JSON.parse(this.pod.kovmetadata[field + '.meta'])
-            const smallPreference = metaJson.preference === 'small'
-            const normalizedRange = metaJson.max - metaJson.min
-            const color = normalizedRange === 0 ? 0 : Math.max(Math.min(((Number(this.pod.kovmetadata[field]) || metaJson.min) - metaJson.min) / normalizedRange, 1), 0)
-            return {color: PIXI.utils.rgb2hex(HSVtoRGB(smallPreference ? maxHue - color * maxHue : color * maxHue, 1, 1))}
-        } else {
-            const range = Object.values(ALL_PODS).reduce((memo, current) => {
-                if (!memo) {
-                    return {
-                        min: Number(current.pod.kovmetadata[field]) || 0,
-                        max: Number(current.pod.kovmetadata[field]) || 0
-                    }
-                }
-
-                if (current.pod.kovmetadata[field]) {
-                    if (Number(current.pod.kovmetadata[field]) < memo.min) {
-                        return {min: Number(current.pod.kovmetadata[field]), max: memo.max}
-                    }
-
-                    if (Number(current.pod.kovmetadata[field]) > memo.max) {
-                        return {min: memo.min, max: Number(current.pod.kovmetadata[field])}
-                    }
-                }
-
-                return memo
-            }, null)
-
-            const normalizedRange = range.max - range.min
-            const color = normalizedRange === 0 ? 0 : ((Number(this.pod.kovmetadata[field]) || range.min) - range.min) / normalizedRange
-            return {color: PIXI.utils.rgb2hex(HSVtoRGB(color * maxHue, 1, 1))}
+            try {
+                const metaJson = JSON.parse(this.pod.kovmetadata[field + '.meta'])
+                const smallPreference = metaJson.preference === 'small'
+                const normalizedRange = metaJson.max - metaJson.min
+                const color = normalizedRange === 0 ? 0 : Math.max(Math.min(((Number(this.pod.kovmetadata[field]) || metaJson.min) - metaJson.min) / normalizedRange, 1), 0)
+                return {color: PIXI.utils.rgb2hex(HSVtoRGB(smallPreference ? maxHue - color * maxHue : color * maxHue, 1, 1))}
+            } catch (e) {
+                // probably bad json, so fall back to not using any metadata
+            }
         }
+
+        // Fall back to finding the ranges manually
+        const range = Object.values(ALL_PODS).reduce((memo, current) => {
+            if (!memo) {
+                return {
+                    min: Number(current.pod.kovmetadata[field]) || 0,
+                    max: Number(current.pod.kovmetadata[field]) || 0
+                }
+            }
+
+            if (current.pod.kovmetadata[field] && Number(current.pod.kovmetadata[field])) {
+                if (Number(current.pod.kovmetadata[field]) < memo.min) {
+                    return {min: Number(current.pod.kovmetadata[field]), max: memo.max}
+                }
+
+                if (Number(current.pod.kovmetadata[field]) > memo.max) {
+                    return {min: memo.min, max: Number(current.pod.kovmetadata[field])}
+                }
+            }
+
+            return memo
+        }, null)
+
+        const normalizedRange = range.max - range.min
+        const color = normalizedRange === 0 ? 0 : ((Number(this.pod.kovmetadata[field]) || range.min) - range.min) / normalizedRange
+        return {color: PIXI.utils.rgb2hex(HSVtoRGB(color * maxHue, 1, 1))}
     }
 
     podMenu() {
