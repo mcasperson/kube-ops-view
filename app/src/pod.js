@@ -321,19 +321,20 @@ export class Pod extends PIXI.Graphics {
             current.pod.kovmetadata = current.pod.kovmetadata || []
         })
 
+        // If the metadata is not set at all, show as a grey tile
         if (this.pod.kovmetadata[field] === undefined) {
-            return {color: 0x0000FF}
-        }
-
-        if (!this.pod.kovmetadata[field]) {
             return {color: 0xC0C0C0}
         }
 
+        // If the metadata is set to an empty string, so as a blue tile
+        if (!this.pod.kovmetadata[field]) {
+            return {color: 0x4b0082}
+        }
 
         // Attempt to display the overlay based on the hard coded ranges
         if (this.pod.kovmetadata[field + '.meta']) {
             try {
-                const metaJson = JSON.parse('{"max":5, "min":1, "preference":"small"}') //JSON.parse(this.pod.kovmetadata[field + '.meta'])
+                const metaJson = JSON.parse(this.pod.kovmetadata[field + '.meta'])
                 const smallPreference = metaJson.preference === 'small'
                 const normalizedRange = metaJson.max - metaJson.min
                 const color = normalizedRange === 0 ? 0 : Math.max(Math.min(((Number(this.pod.kovmetadata[field]) || metaJson.min) - metaJson.min) / normalizedRange, 1), 0)
