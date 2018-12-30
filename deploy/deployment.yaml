@@ -17,10 +17,19 @@ spec:
         version: v0.9
     spec:
       serviceAccount: kube-ops-view
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+              - matchExpressions:
+                  - key: beta.kubernetes.io/os
+                    operator: In
+                    values:
+                      - "linux"
       containers:
       - name: service
         # see https://github.com/hjacobs/kube-ops-view/releases
-        image: hjacobs/kube-ops-view:0.9
+        image: mcasperson/kube-ops-view:0.9.1.2
         args:
         # remove this option to use built-in memory store
         - --redis-url=redis://kube-ops-view-redis:6379
