@@ -13,6 +13,7 @@ rules:
   resources: ["nodes", "pods", "configmaps"]
   verbs:
     - list
+    - get
 - apiGroups: ["metrics.k8s.io"]
   resources: ["nodes", "pods", "configmaps"]
   verbs:
