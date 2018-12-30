@@ -423,7 +423,7 @@ export default class App {
             that.overlay = value
             that.update()
         })
-        overlayOptions.x = 580
+        overlayOptions.x = 650
         overlayOptions.y = 3
         this.menuBar.addChild(overlayOptions.draw())
         this.overlayOptions = overlayOptions
