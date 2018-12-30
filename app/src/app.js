@@ -403,32 +403,30 @@ export default class App {
     }
 
     drawOverlay() {
-        const that = this
-        PIXI.ticker.shared.add(function (_) {
-            if (that.overlayOptions) {
-                that.overlayOptions.destroy()
-            }
+        if (this.overlayOptions) {
+            this.menuBar.removeChild(this.overlayOptions)
+            this.overlayOptions.destroy()
+        }
 
-            const items = Object.values(ALL_PODS)
-                .flatMap(current => current.pod && current.pod.kovmetadata && Object.keys(current.pod.kovmetadata) || [])
-                .filter(meta => !meta.endsWith('.meta'))
-                .filter((v, i, a) => a.indexOf(v) === i)
-            items.push('default')
+        const items = Object.values(ALL_PODS)
+            .flatMap(current => current.pod && current.pod.kovmetadata && Object.keys(current.pod.kovmetadata) || [])
+            .filter(meta => !meta.endsWith('.meta'))
+            .filter((v, i, a) => a.indexOf(v) === i)
+        items.push('default')
 
-            const selectBoxItems = items.map(i => {
-                return {text: i, value: i}
-            })
-
-            //setting default sort
-            const overlayOptions = new SelectBox(selectBoxItems, that.overlay, function (value) {
-                that.overlay = value
-                that.update()
-            })
-            overlayOptions.x = 580
-            overlayOptions.y = 3
-            that.menuBar.addChild(overlayOptions.draw())
-            that.overlayOptions = overlayOptions
+        const selectBoxItems = items.map(i => {
+            return {text: i, value: i}
         })
+
+        const that = this
+        const overlayOptions = new SelectBox(selectBoxItems, that.overlay, function (value) {
+            that.overlay = value
+            that.update()
+        })
+        overlayOptions.x = 580
+        overlayOptions.y = 3
+        this.menuBar.addChild(overlayOptions.draw())
+        this.overlayOptions = overlayOptions
     }
 
     drawResetButton(menuBar) {
@@ -760,6 +758,8 @@ export default class App {
     }
 
     update() {
+        this.drawOverlay()
+
         // make sure we create a copy (this.clusters might get modified)
         const clusters = Array.from(this.clusters.entries()).sort().map(idCluster => idCluster[1])
         const that = this
