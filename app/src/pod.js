@@ -9,7 +9,7 @@ const PIXI = require('pixi.js')
 const ALL_PODS = {}
 
 const MAX_HUE = 1 / 3.5
-const EMPTY_METADATA_VALUE_COLOR = 0x4b0082
+const EMPTY_METADATA_VALUE_COLOR = 0xff00ee
 const UNDEFINED_METADATA_VALUE_COLOR = 0xC0C0C0
 
 const sortByName = (a, b) => {
