@@ -96,6 +96,18 @@ const podResource = type => (containers, resource) =>
         .map(({resources}) => resources ? metric(resources[resource], type) : 0)
         .reduce((a, b) => a + b, 0)
 
+export function hashCode(input) {
+    let hash = 0
+    if (input == 0) return hash
+    for (let i = 0; i < input.length; i++) {
+        const char = input.charCodeAt(i)
+        hash = ((hash<<5)-hash)+char
+        hash = hash & hash // Convert to 32bit integer
+    }
+    return hash
+}
+
+
 export function HSVtoRGB(h, s, v) {
     var r, g, b, i, f, p, q, t
     if (arguments.length === 1) {

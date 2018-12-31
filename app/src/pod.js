@@ -2,11 +2,15 @@ import {MENU_HORIZONTAL_PADDING} from './menu'
 import App from './app.js'
 import {FACTORS, getBarColor, podResource} from './utils.js'
 import {BRIGHTNESS_FILTER} from './filters.js'
-import {HSVtoRGB} from './utils'
+import {hashCode, HSVtoRGB} from './utils'
 
 const PIXI = require('pixi.js')
 
 const ALL_PODS = {}
+
+const MAX_HUE = 1 / 3.5
+const EMPTY_METADATA_VALUE_COLOR = 0x4b0082
+const UNDEFINED_METADATA_VALUE_COLOR = 0xC0C0C0
 
 const sortByName = (a, b) => {
     // https://github.com/hjacobs/kube-ops-view/issues/103
@@ -227,9 +231,8 @@ export class Pod extends PIXI.Graphics {
             podBox.drawRect(i * w, 0, w, 10)
         }
 
-        const view = App.current.overlay === 'default'
-            ? this.standardPodSummary(allReady, allRunning)
-            : this.numericPodSummary(App.current.overlay)
+        this.initialiseMetadataDefaults()
+        const view = this.getSummary(App.current.overlay, allReady, allRunning)
 
         podBox.lineStyle(2, view.color, 1)
         podBox.beginFill(view.color, 0.2)
@@ -316,8 +319,6 @@ export class Pod extends PIXI.Graphics {
     }
 
     numericPodSummary(field) {
-        const maxHue = 1 / 3.5
-
         // make sure this annotation is available on every pod, set to null if it is missing
         Object.values(ALL_PODS).forEach(current => {
             current.pod.kovmetadata = current.pod.kovmetadata || []
@@ -325,12 +326,12 @@ export class Pod extends PIXI.Graphics {
 
         // If the metadata is not set at all, show as a grey tile
         if (this.pod.kovmetadata[field] === undefined) {
-            return {color: 0xC0C0C0}
+            return {color: UNDEFINED_METADATA_VALUE_COLOR}
         }
 
         // If the metadata is set to an empty string, so as a blue tile
         if (!this.pod.kovmetadata[field]) {
-            return {color: 0x4b0082}
+            return {color: EMPTY_METADATA_VALUE_COLOR}
         }
 
         // Attempt to display the overlay based on the hard coded ranges
@@ -349,7 +350,7 @@ export class Pod extends PIXI.Graphics {
                 const color = normalizedRange === 0
                     ? 0
                     : Math.max(Math.min(((Number(this.pod.kovmetadata[field]) || min) - min) / normalizedRange, 1), 0)
-                return {color: PIXI.utils.rgb2hex(HSVtoRGB(smallPreference ? maxHue - color * maxHue : color * maxHue, 1, 1))}
+                return {color: PIXI.utils.rgb2hex(HSVtoRGB(smallPreference ? MAX_HUE - color * MAX_HUE : color * MAX_HUE, 1, 1))}
             } catch (e) {
                 // probably bad json, so fall back to not using any metadata
             }
@@ -365,11 +366,11 @@ export class Pod extends PIXI.Graphics {
             }
 
             if (current.pod.kovmetadata[field] && Number(current.pod.kovmetadata[field])) {
-                if (Number(current.pod.kovmetadata[field]) < memo.min) {
+                if (Number(current.pod.kovmetadata[field].toString().trim()) < memo.min) {
                     return {min: Number(current.pod.kovmetadata[field]), max: memo.max}
                 }
 
-                if (Number(current.pod.kovmetadata[field]) > memo.max) {
+                if (Number(current.pod.kovmetadata[field].toString().trim()) > memo.max) {
                     return {min: memo.min, max: Number(current.pod.kovmetadata[field])}
                 }
             }
@@ -379,7 +380,91 @@ export class Pod extends PIXI.Graphics {
 
         const normalizedRange = range.max - range.min
         const color = normalizedRange === 0 ? 0 : ((Number(this.pod.kovmetadata[field]) || range.min) - range.min) / normalizedRange
-        return {color: PIXI.utils.rgb2hex(HSVtoRGB(color * maxHue, 1, 1))}
+        return {color: PIXI.utils.rgb2hex(HSVtoRGB(color * MAX_HUE, 1, 1))}
+    }
+
+    booleanPodSummary(field) {
+        // If the metadata is not set at all, show as a grey tile
+        if (this.pod.kovmetadata[field] === undefined || this.pod.kovmetadata[field] === null) {
+            return {color: UNDEFINED_METADATA_VALUE_COLOR}
+        }
+
+        // If the metadata is set to an empty string, so as a blue tile
+        if (!this.pod.kovmetadata[field]) {
+            return {color: EMPTY_METADATA_VALUE_COLOR}
+        }
+
+        return {color: PIXI.utils.rgb2hex(HSVtoRGB(
+            this.pod.kovmetadata[field].toString().trim().toLowerCase() === 'false' ? 0 : MAX_HUE,
+            1,
+            1))}
+    }
+
+    /**
+     * Generate a random color for the pod based on the string metadata value
+     * @param field The metadata field
+     * @returns {{color: number}} A color based on the value of the metadata field
+     */
+    genericPodSummary(field) {
+        // If the metadata is not set at all, show as a grey tile
+        if (this.pod.kovmetadata[field] === undefined || this.pod.kovmetadata[field] === null) {
+            return {color: UNDEFINED_METADATA_VALUE_COLOR}
+        }
+
+        // If the metadata is set to an empty string, so as a blue tile
+        if (!this.pod.kovmetadata[field]) {
+            return {color: EMPTY_METADATA_VALUE_COLOR}
+        }
+
+        return {color: PIXI.utils.rgb2hex(HSVtoRGB(
+            (hashCode(this.pod.kovmetadata[field].toString().trim()) % 255) / 255,
+            1,
+            1))}
+    }
+
+    initialiseMetadataDefaults() {
+        // make sure this annotation is available on every pod, set to null if it is missing
+        Object.values(ALL_PODS).forEach(current => {
+            current.pod.kovmetadata = current.pod.kovmetadata || []
+        })
+    }
+
+    getSummary(field, allReady, allRunning) {
+        if (field === 'default') {
+            return this.standardPodSummary(allReady, allRunning)
+        }
+
+        if (this.allMetadataIsNumeric(field)) {
+            return this.numericPodSummary(field)
+        }
+
+        if (this.allMetadataIsBoolean(field)) {
+            return this.booleanPodSummary(field)
+        }
+
+        return this.genericPodSummary(field)
+    }
+
+    /**
+     * Check to see if all the metadata values are numbers
+     * @param field
+     * @returns {boolean}
+     */
+    allMetadataIsNumeric(field) {
+        return Object.values(ALL_PODS).every(current =>
+            current.pod.kovmetadata[field] === undefined ||
+            current.pod.kovmetadata[field] === null ||
+            current.pod.kovmetadata[field].toString().trim() === '' ||
+            Number(current.pod.kovmetadata[field].toString().trim()))
+    }
+
+    allMetadataIsBoolean(field) {
+        return Object.values(ALL_PODS).every(current =>
+            current.pod.kovmetadata[field] === undefined ||
+            current.pod.kovmetadata[field] === null ||
+            current.pod.kovmetadata[field].toString().trim() === '' ||
+            current.pod.kovmetadata[field].toString().trim().toLowerCase() === 'false' ||
+            current.pod.kovmetadata[field].toString().trim().toLowerCase() === 'true')
     }
 
     podMenu() {
