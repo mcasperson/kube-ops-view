@@ -457,7 +457,7 @@ export class Pod extends PIXI.Graphics {
         }
 
         return {color: PIXI.utils.rgb2hex(HSVtoRGB(
-            (hashCode(this.pod.kovmetadata[field].toString().trim()) % 255) / 255,
+            (Math.abs(hashCode(this.pod.kovmetadata[field].toString().trim())) % 255) / 255 * MAX_HUE,
             1,
             1))}
     }
