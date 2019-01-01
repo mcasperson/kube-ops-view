@@ -5,6 +5,12 @@ import {BRIGHTNESS_FILTER} from './filters.js'
 import {hashCode, HSVtoRGB} from './utils'
 
 const PIXI = require('pixi.js')
+const {
+    compareSemVer,
+    isValidSemVer,
+    parseSemVer,
+    parseVersionPart,
+} = require('semver-parser')
 
 const ALL_PODS = {}
 
@@ -318,6 +324,40 @@ export class Pod extends PIXI.Graphics {
         }
     }
 
+    semverPodSummary(field) {
+        // make sure this annotation is available on every pod, set to null if it is missing
+        Object.values(ALL_PODS).forEach(current => {
+            current.pod.kovmetadata = current.pod.kovmetadata || []
+        })
+
+        // If the metadata is not set at all, show as a grey tile
+        if (this.pod.kovmetadata[field] === undefined) {
+            return {color: UNDEFINED_METADATA_VALUE_COLOR}
+        }
+
+        // If the metadata is set to an empty string, so as a blue tile
+        if (!this.pod.kovmetadata[field]) {
+            return {color: EMPTY_METADATA_VALUE_COLOR}
+        }
+
+        // Fall back to finding the ranges manually.
+        const versions = Object.values(ALL_PODS)
+            .map(current => current.pod.kovmetadata[field])
+            .filter(current => current)
+            .filter((v, i, a) => a.indexOf(v) === i)
+            .sort((current, next) => compareSemVer(current, next))
+
+        if (versions.length === 0) {
+            return {color: PIXI.utils.rgb2hex(HSVtoRGB(0, 1, 1))}
+        }
+
+        return {color: PIXI.utils.rgb2hex(
+            HSVtoRGB(
+                (versions.indexOf(this.pod.kovmetadata[field]) + 1) / versions.length * MAX_HUE,
+                1,
+                1))}
+    }
+
     numericPodSummary(field) {
         // make sure this annotation is available on every pod, set to null if it is missing
         Object.values(ALL_PODS).forEach(current => {
@@ -442,13 +482,30 @@ export class Pod extends PIXI.Graphics {
             return this.booleanPodSummary(field)
         }
 
+        if (this.allMetadataIsSemver(field)) {
+            return this.semverPodSummary(field)
+        }
+
         return this.genericPodSummary(field)
     }
 
     /**
+     * Check to see if all the metadata values are semver values
+     * @param field The metadata field to inspect
+     * @returns {boolean} true if all fields are empty, undefined, null or semver strings
+     */
+    allMetadataIsSemver(field) {
+        return Object.values(ALL_PODS).every(current =>
+            current.pod.kovmetadata[field] === undefined ||
+            current.pod.kovmetadata[field] === null ||
+            current.pod.kovmetadata[field].toString().trim() === '' ||
+            isValidSemVer(current.pod.kovmetadata[field].toString().trim()))
+    }
+
+    /**
      * Check to see if all the metadata values are numbers
-     * @param field
-     * @returns {boolean}
+     * @param field The metadata field to inspect
+     * @returns {boolean} true if all fields are empty, undefined, null or numbers
      */
     allMetadataIsNumeric(field) {
         return Object.values(ALL_PODS).every(current =>
@@ -458,6 +515,11 @@ export class Pod extends PIXI.Graphics {
             Number(current.pod.kovmetadata[field].toString().trim()))
     }
 
+    /**
+     * Check to see if all the metadata values are numbers
+     * @param field The metadata field to inspect
+     * @returns {boolean} true if all fields are empty, undefined, null or boolean strings
+     */
     allMetadataIsBoolean(field) {
         return Object.values(ALL_PODS).every(current =>
             current.pod.kovmetadata[field] === undefined ||
@@ -467,6 +529,9 @@ export class Pod extends PIXI.Graphics {
             current.pod.kovmetadata[field].toString().trim().toLowerCase() === 'true')
     }
 
+    /**
+     * Handle the context menu of a pod
+     */
     podMenu() {
         this.on('rightdown', function(event) {
             Pod.selected = this.pod
