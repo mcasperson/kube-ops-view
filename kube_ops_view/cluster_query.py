@@ -95,12 +95,6 @@ def query_kubernetes_cluster(cluster):
                 # the job/pod finished more than an hour ago or if it is evicted by cgroup limits
                 # => filter out
                 continue
-        pods_by_namespace_name[(obj['namespace'], obj['name'])] = obj
-        pod_key = '{}/{}'.format(obj['namespace'], obj['name'])
-        if 'nodeName' in pod['spec'] and pod['spec']['nodeName'] in nodes:
-            nodes[pod['spec']['nodeName']]['pods'][pod_key] = obj
-        else:
-            unassigned_pods[pod_key] = obj
 
         try:
             if obj.get('annotations') and obj.get('annotations').get('kov/metadata'):
@@ -109,6 +103,13 @@ def query_kubernetes_cluster(cluster):
                 obj['kovmetadata'] = response.json()['data']
         except Exception:
             pass
+
+        pods_by_namespace_name[(obj['namespace'], obj['name'])] = obj
+        pod_key = '{}/{}'.format(obj['namespace'], obj['name'])
+        if 'nodeName' in pod['spec'] and pod['spec']['nodeName'] in nodes:
+            nodes[pod['spec']['nodeName']]['pods'][pod_key] = obj
+        else:
+            unassigned_pods[pod_key] = obj
 
     try:
         response = request(cluster, '/apis/metrics.k8s.io/v1beta1/nodes')
