@@ -417,8 +417,10 @@ export default class App {
             this.overlayOptions.destroy()
         }
 
-        this.overlayItems = Object.values(ALL_PODS)
-            .flatMap(current => current.pod && current.pod.kovmetadata && Object.keys(current.pod.kovmetadata) || [])
+        this.overlayItems = Array.from(this.clusters.entries())
+            .flatMap(cluster => cluster[1].nodes && Object.values(cluster[1].nodes) || [])
+            .flatMap(node => node.pods && Object.values(node.pods) || [])
+            .flatMap(current => current.kovmetadata && Object.keys(current.kovmetadata) || [])
             .filter(meta => !meta.endsWith('.meta'))
             .filter((v, i, a) => a.indexOf(v) === i)
         this.overlayItems.push('default')
