@@ -25,7 +25,8 @@ export default class App {
         this.selectedClusters = new Set((params.get('clusters') || '').split(',').filter(x => x))
         this.seenPods = new Set()
         this.sorterFn = ''
-        this.overlay = 'default'
+        this.overlay = localStorage.getItem('overlay') || 'default'
+        this.overlayItems = []
         this.theme = Theme.get(localStorage.getItem('theme'))
         this.eventSource = null
         this.connectTime = null
@@ -34,6 +35,14 @@ export default class App {
         this.clusterStatuses = new Map()
         this.viewContainerTargetPosition = new PIXI.Point()
         this.bootstrapping = true
+    }
+
+    getOverlay() {
+        if (this.overlayItems.indexOf(this.overlay) !== -1) {
+            return this.overlay
+        }
+
+        return 'default'
     }
 
     parseLocationHash() {
@@ -408,19 +417,20 @@ export default class App {
             this.overlayOptions.destroy()
         }
 
-        const items = Object.values(ALL_PODS)
+        this.overlayItems = Object.values(ALL_PODS)
             .flatMap(current => current.pod && current.pod.kovmetadata && Object.keys(current.pod.kovmetadata) || [])
             .filter(meta => !meta.endsWith('.meta'))
             .filter((v, i, a) => a.indexOf(v) === i)
-        items.push('default')
+        this.overlayItems.push('default')
 
-        const selectBoxItems = items.map(i => {
+        const selectBoxItems = this.overlayItems.map(i => {
             return {text: i, value: i}
         })
 
         const that = this
-        const overlayOptions = new SelectBox(selectBoxItems, that.overlay, function (value) {
+        const overlayOptions = new SelectBox(selectBoxItems, that.getOverlay(), function (value) {
             that.overlay = value
+            localStorage.setItem('overlay', value)
             that.update()
         })
         overlayOptions.x = 580
@@ -913,7 +923,10 @@ export default class App {
             const now = Date.now()
             if (now - this.connectTime > this.config.maxConnectionLifetimeSeconds * 1000) {
                 // maximum connection lifetime exceeded => reconnect
-                this.connect()
+                // this.connect()
+
+                // Reload the page every so often to for a relogin
+                location.reload()
             }
         }
     }
