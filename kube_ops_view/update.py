@@ -12,7 +12,7 @@ logger = logging.getLogger(__name__)
 
 
 def calculate_backoff(tries: int):
-    return random_jitter(expo(tries, factor=2, max_value=60), jitter=4)
+    return random_jitter(expo(tries, factor=2, max_value=10), jitter=4)
 
 
 def handle_query_failure(e: Exception, cluster, backoff: dict):
