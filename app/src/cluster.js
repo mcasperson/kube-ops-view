@@ -46,10 +46,11 @@ export default class Cluster extends PIXI.Graphics {
         const left = 10
         const top = 20
         const padding = 5
+        const initialMasterHeight = 15
         let masterX = left
         let masterY = top
         let masterWidth = 0
-        let masterHeight = 15
+        let masterHeight = initialMasterHeight
         let workerX = left
         let workerY = top
         let workerWidth = 0
@@ -75,7 +76,7 @@ export default class Cluster extends PIXI.Graphics {
                     masterY += nodeBox.height + padding
                     masterHeight += nodeBox.height + padding
                 }
-                if (masterHeight == 20) {
+                if (masterHeight == initialMasterHeight) {
                     masterHeight = nodeBox.height + padding
                 }
                 nodeBox.x = masterX
