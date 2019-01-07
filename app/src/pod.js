@@ -238,7 +238,7 @@ export class Pod extends PIXI.Graphics {
         }
 
         this.initialiseMetadataDefaults()
-        const view = this.getSummary(App.current.overlay, allReady, allRunning)
+        const view = this.getSummary(App.current.getOverlay(), allReady, allRunning)
 
         podBox.lineStyle(2, view.color, 1)
         podBox.beginFill(view.color, 0.2)

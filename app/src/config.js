@@ -11,8 +11,8 @@ export default class Config {
         this.keepAliveSeconds = 20
         // always reconnect after 5 minutes
         this.maxConnectionLifetimeSeconds = 300
-        // consider cluster data older than 1 minute outdated
-        this.maxDataAgeSeconds = 60
+        // consider cluster data older than 90 seconds outdated
+        this.maxDataAgeSeconds = 90
     }
 
     static fromParams(params) {
