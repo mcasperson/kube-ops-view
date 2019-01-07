@@ -682,6 +682,14 @@ export default class App {
                     .addButton('Copy Into Pod', that.copyCommandToClipboard(
                         () => 'kubectl cp /some/local/file ' + Pod.selected.namespace + '/' + Pod.selected.name + ':/a/file/in/the/pod'))
             })
+            .addSubMenu('Fields >', function (subMenu) {
+                subMenu
+                    .addButton('Namespace', that.copyCommandToClipboard(
+                        () => Pod.selected.namespace))
+                    .addButton('Name', that.copyCommandToClipboard(
+                        () => Pod.selected.name))
+            })
+
         this.menu = menu
     }
 
