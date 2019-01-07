@@ -933,10 +933,7 @@ export default class App {
             const now = Date.now()
             if (now - this.connectTime > this.config.maxConnectionLifetimeSeconds * 1000) {
                 // maximum connection lifetime exceeded => reconnect
-                // this.connect()
-
-                // Reload the page every so often to for a relogin
-                location.reload()
+                this.connect()
             }
         }
     }
