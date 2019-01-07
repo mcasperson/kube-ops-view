@@ -49,7 +49,7 @@ export default class Cluster extends PIXI.Graphics {
         let masterX = left
         let masterY = top
         let masterWidth = 0
-        let masterHeight = 20
+        let masterHeight = 15
         let workerX = left
         let workerY = top
         let workerWidth = 0
