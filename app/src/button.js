@@ -4,7 +4,7 @@ const PIXI = require('pixi.js')
 
 export default class Button extends PIXI.Graphics
 {
-    constructor(value, onClick)
+    constructor(value, onClick, fontSize)
     {
         super()
 
@@ -13,6 +13,7 @@ export default class Button extends PIXI.Graphics
 
         this.value = value
         this.onClick = onClick
+        this.fontSize = fontSize || 14
     }
 
     onBackOver() {
@@ -30,7 +31,7 @@ export default class Button extends PIXI.Graphics
 
         this.text = new PIXI.Text(this.value, {
             fontFamily: 'ShareTechMono',
-            fontSize: 14,
+            fontSize: this.fontSize,
             fill: App.current.theme.primaryColor,
             align: 'center'
         })
@@ -39,11 +40,12 @@ export default class Button extends PIXI.Graphics
         this.addChild(this.text)
 
         // FIXME: hardcoded value for average char width..
-        const textBoxWidth = 7 + 8 * this.value.length
+        const textBoxWidth = 7 + .55 * this.fontSize * this.value.length
+        const textBoxHeight = this.fontSize + 8
 
         // draw a triangle
         button.lineStyle(1, App.current.theme.primaryColor, 1)
-        button.drawRect(0, 0, textBoxWidth, 22)
+        button.drawRect(0, 0, textBoxWidth, textBoxHeight)
 
         button.on('mousedown', button.onClick.bind(this))
         button.on('touchstart', button.onClick.bind(this))

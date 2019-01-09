@@ -6,6 +6,11 @@ const PIXI = require('pixi.js')
 
 const CLUSTER_ZOOM = 1
 const NODE_ZOOM = 4
+/**
+ * How long to wait for fresh data from the server before considering the information old
+ * @type {number}
+ */
+const MAX_DATA_AGE = 60
 
 export default class Cluster extends PIXI.Graphics {
     constructor (cluster, status, tooltip, menu, nodeMenu, clusterMenu, zoomInto) {
@@ -146,7 +151,7 @@ export default class Cluster extends PIXI.Graphics {
 
         let newTick = null
         const nowSeconds = Date.now() / 1000
-        if (this.status && this.status.last_query_time < nowSeconds - 20) {
+        if (this.status && this.status.last_query_time < nowSeconds - MAX_DATA_AGE) {
             newTick = this.pulsate
         }
 

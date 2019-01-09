@@ -42,7 +42,7 @@ export default class Menu extends PIXI.Graphics {
     }
 
     addButton(label, callback) {
-        this.items.push(new Button(label, callback))
+        this.items.push(new Button(label, callback, 20))
         return this
     }
 
