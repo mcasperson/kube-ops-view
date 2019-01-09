@@ -359,7 +359,7 @@ export default class App {
         const themeSelector = new SelectBox(themeOptions, this.theme.name, function (value) {
             app.switchTheme(value)
         })
-        themeSelector.x = 420
+        themeSelector.x = 500
         themeSelector.y = 3
         this.menuBar.addChild(themeSelector.draw())
     }
@@ -385,7 +385,7 @@ export default class App {
         const selectBox = new SelectBox(items, this.sorterFn, function (value) {
             app.changeSorting(value)
         })
-        selectBox.x = 265
+        selectBox.x = 345
         selectBox.y = 3
         this.menuBar.addChild(selectBox.draw())
     }
@@ -435,7 +435,7 @@ export default class App {
             localStorage.setItem('overlay', value)
             that.update()
         })
-        overlayOptions.x = 580
+        overlayOptions.x = 660
         overlayOptions.y = 3
         this.menuBar.addChild(overlayOptions.draw())
         this.overlayOptions = overlayOptions
@@ -446,7 +446,7 @@ export default class App {
             this.draw()
             this.update()
         })
-        resetButton.x = 780
+        resetButton.x = 265
         resetButton.y = 3
         menuBar.addChild(resetButton.draw())
     }
@@ -694,6 +694,14 @@ export default class App {
                     .addButton('Copy Into Pod', that.copyCommandToClipboard(
                         () => 'kubectl cp /some/local/file ' + Pod.selected.namespace + '/' + Pod.selected.name + ':/a/file/in/the/pod'))
             })
+            .addSubMenu('Fields >', function (subMenu) {
+                subMenu
+                    .addButton('Namespace', that.copyCommandToClipboard(
+                        () => Pod.selected.namespace))
+                    .addButton('Name', that.copyCommandToClipboard(
+                        () => Pod.selected.name))
+            })
+
         this.menu = menu
     }
 
@@ -925,10 +933,7 @@ export default class App {
             const now = Date.now()
             if (now - this.connectTime > this.config.maxConnectionLifetimeSeconds * 1000) {
                 // maximum connection lifetime exceeded => reconnect
-                // this.connect()
-
-                // Reload the page every so often to for a relogin
-                location.reload()
+                this.connect()
             }
         }
     }
