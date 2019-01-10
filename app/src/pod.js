@@ -2,7 +2,7 @@ import {MENU_HORIZONTAL_PADDING} from './menu'
 import App from './app.js'
 import {FACTORS, getBarColor, podResource} from './utils.js'
 import {BRIGHTNESS_FILTER} from './filters.js'
-import {hashCode, HSVtoRGB} from './utils'
+import {hashCode, hsvToRgb, HSVtoRGB} from './utils'
 
 const PIXI = require('pixi.js')
 const {
@@ -283,25 +283,45 @@ export class Pod extends PIXI.Graphics {
         }
 
         // CPU
+        const cpu = new PIXI.Text('CPU', {fontFamily: 'ShareTechMono', fontSize: 10, fill: 0x000000, resolution: 10})
+        cpu.scale.x = 8 / cpu.width
+        cpu.scale.y = 1 / cpu.height
+        cpu.rotation = Math.PI/2
+        cpu.position.x = 2
+        cpu.position.y = 1
+        podBox.addChild(cpu)
+
         const scaleCpu = resources.cpu.requested <= resources.cpu.limit ? resources.cpu.limit / 8 : resources.cpu.requested / 8
         const scaledCpuReq = resources.cpu.requested !== 0 && scaleCpu !== 0 ? resources.cpu.requested / scaleCpu : 0
         const scaledCpuUsed = resources.cpu.used !== 0 && scaleCpu !== 0 ? resources.cpu.used / scaleCpu : 0
         podBox.lineStyle()
+        podBox.beginFill(0x0000FF, 1)
+        podBox.drawRect(1, 1, 1, 8)
         podBox.beginFill(getBarColor(resources.cpu.requested, resources.cpu.limit), 1)
-        podBox.drawRect(1, 9 - scaledCpuReq, 1, scaledCpuReq)
+        podBox.drawRect(2, 9 - scaledCpuReq, 1, scaledCpuReq)
         podBox.beginFill(getBarColor(resources.cpu.used, resources.cpu.limit), 1)
-        podBox.drawRect(2, 9 - scaledCpuUsed, 1, scaledCpuUsed)
+        podBox.drawRect(3, 9 - scaledCpuUsed, 1, scaledCpuUsed)
         podBox.endFill()
 
         // Memory
+        const memory = new PIXI.Text('Memory', {fontFamily: 'ShareTechMono', fontSize: 10, fill: 0x000000, resolution: 10})
+        memory.scale.x = 8 / memory.width
+        memory.scale.y = 1 / memory.height
+        memory.rotation = Math.PI/2
+        memory.position.x = 6
+        memory.position.y = 1
+        podBox.addChild(memory)
+
         const scale = resources.memory.requested <= resources.memory.limit ? resources.memory.limit / 8 : resources.memory.requested / 8
         const scaledMemReq = resources.memory.requested !== 0 && scale !== 0 ? resources.memory.requested / scale : 0
         const scaledMemUsed = resources.memory.used !== 0 && scale !== 0 ? resources.memory.used / scale : 0
         podBox.lineStyle()
+        podBox.beginFill(0x0000FF, 1)
+        podBox.drawRect(5, 1, 1, 8)
         podBox.beginFill(getBarColor(resources.memory.requested, resources.memory.limit), 1)
-        podBox.drawRect(3, 9 - scaledMemReq, 1, scaledMemReq)
+        podBox.drawRect(6, 9 - scaledMemReq, 1, scaledMemReq)
         podBox.beginFill(getBarColor(resources.memory.used, resources.memory.limit), 1)
-        podBox.drawRect(4, 9 - scaledMemUsed, 1, scaledMemUsed)
+        podBox.drawRect(7, 9 - scaledMemUsed, 1, scaledMemUsed)
         podBox.endFill()
 
         return this
