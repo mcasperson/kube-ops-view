@@ -640,13 +640,25 @@ export default class App {
                         that.copyCommandToClipboard(
                             () => 'kubectl logs ' + Pod.selected.name + ' -n ' + Pod.selected.namespace))
                     .addButton(
+                        'Pod Logs Tail',
+                        that.copyCommandToClipboard(
+                            () => 'kubectl logs ' + Pod.selected.name + ' -n ' + Pod.selected.namespace + ' --tail 50'))
+                    .addButton(
                         'Pod Logs Following',
                         that.copyCommandToClipboard(
                             ()=> 'kubectl logs ' + Pod.selected.name + ' -n ' + Pod.selected.namespace + ' -f'))
                     .addButton(
+                        'Pod Logs Following Tail',
+                        that.copyCommandToClipboard(
+                            ()=> 'kubectl logs ' + Pod.selected.name + ' -n ' + Pod.selected.namespace + ' -f --tail 50'))
+                    .addButton(
                         'Pod Logs Previous',
                         that.copyCommandToClipboard(
                             () => 'kubectl logs --previous ' + Pod.selected.name + ' -n ' + Pod.selected.namespace))
+                    .addButton(
+                        'Pod Logs Previous Tail',
+                        that.copyCommandToClipboard(
+                            () => 'kubectl logs --previous ' + Pod.selected.name + ' -n ' + Pod.selected.namespace + ' --tail 50'))
             })
             .addSubMenu('Delete >', function (subMenu) {
                 subMenu
