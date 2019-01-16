@@ -17,6 +17,10 @@ export default class Bars extends PIXI.Graphics {
     }
 
     draw() {
+        this.children.forEach(child => child.destroy())
+        this.removeChildren()
+        this.clear()
+
         const bars = this
 
         const barHeight = 92

@@ -67,8 +67,9 @@ export default class Node extends PIXI.Graphics {
     draw() {
         const nodeBox = this
 
-        this.clear()
+        this.children.forEach(child => child.destroy())
         this.removeChildren()
+        this.clear()
 
         const topHandle = new PIXI.Graphics()
         topHandle.beginFill(App.current.theme.primaryColor, 1)

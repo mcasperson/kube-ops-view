@@ -160,8 +160,9 @@ export class Pod extends PIXI.Graphics {
 
     draw() {
 
-        this.clear()
+        this.children.forEach(child => child.destroy())
         this.removeChildren()
+        this.clear()
 
         let ready = 0
         let running = 0

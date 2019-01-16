@@ -45,8 +45,10 @@ export default class Cluster extends PIXI.Graphics {
     }
 
     draw () {
+        this.children.forEach(child => child.destroy())
         this.removeChildren()
         this.clear()
+
         const that = this
         const left = 10
         const top = 20

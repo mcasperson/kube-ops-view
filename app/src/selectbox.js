@@ -73,6 +73,10 @@ export default class SelectBox extends PIXI.Graphics {
     }
 
     draw() {
+        this.children.forEach(child => child.destroy())
+        this.removeChildren()
+        this.clear()
+
         const selectBox = this
 
         const backArrow = this.backArrow = new PIXI.Graphics()

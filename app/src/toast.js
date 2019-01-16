@@ -55,6 +55,10 @@ export default class Toast extends PIXI.Graphics
     }
 
     draw() {
+        this.children.forEach(child => child.destroy())
+        this.removeChildren()
+        this.clear()
+
         const toast = this
 
         // FIXME: hardcoded value for average char width..
