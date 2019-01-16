@@ -30,9 +30,11 @@ export default class Button extends PIXI.Graphics
     }
 
     draw() {
-        const button = this
+        this.children.forEach(child => child.destroy())
         this.removeChildren()
         this.clear()
+
+        const button = this
 
         this.text = new PIXI.Text(this.value, {
             fontFamily: 'ShareTechMono',

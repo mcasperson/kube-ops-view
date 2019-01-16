@@ -18,9 +18,11 @@ export default class Menu extends PIXI.Graphics {
     }
 
     draw() {
-        const that = this
+        this.children.forEach(child => child.destroy())
         this.removeChildren()
         this.clear()
+
+        const that = this
         this.items.reduce((verticalPos, item) => {
             const element = item.draw()
             that.addChild(element)
