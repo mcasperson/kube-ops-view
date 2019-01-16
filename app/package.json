@@ -30,7 +30,7 @@
   "dependencies": {
     "babel-polyfill": "^6.26.0",
     "babel-runtime": "^6.26.0",
-    "pixi.js": "^4.8.4",
+    "pixi.js": "^4.8.5",
     "semver-parser": "2.0.7"
   },
   "devDependencies": {

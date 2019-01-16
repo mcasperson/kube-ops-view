@@ -8,6 +8,18 @@ export default class SelectBox extends PIXI.Graphics {
         this.items = items
         this.value = value
         this.onchange = onchange
+
+        this.textItems = items.map(item => {
+            const text = new PIXI.Text(item.text, {
+                fontFamily: 'ShareTechMono',
+                fontSize: 14,
+                fill: App.current.theme.primaryColor,
+                align: 'center'
+            })
+            text.x = 10
+            text.y = 5
+            return text
+        })
     }
 
     destroy(options) {
@@ -54,7 +66,9 @@ export default class SelectBox extends PIXI.Graphics {
     }
 
     draw() {
-        this.children.forEach(child => child.destroy(true))
+        this.children
+            .filter(child => this.textItems.indexOf(child) === -1)
+            .forEach(child => child.destroy(true))
         this.removeChildren()
         this.clear()
 
@@ -62,7 +76,7 @@ export default class SelectBox extends PIXI.Graphics {
 
         this.count = 0
         for (const item of this.items) {
-            if (item.value == this.value) {
+            if (item.value === this.value) {
                 break
             }
             this.count++
@@ -70,15 +84,8 @@ export default class SelectBox extends PIXI.Graphics {
         if (this.count >= this.items.length) {
             this.count = 0
         }
-        const text = new PIXI.Text(this.items[this.count].text, {
-            fontFamily: 'ShareTechMono',
-            fontSize: 14,
-            fill: App.current.theme.primaryColor,
-            align: 'center'
-        })
-        text.x = 10
-        text.y = 5
-        this.addChild(text)
+
+        this.addChild(this.textItems[this.count])
 
         const backArrow = this.backArrow = new PIXI.Graphics()
         const forwardArrow = this.forwardArrow = new PIXI.Graphics()

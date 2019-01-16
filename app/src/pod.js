@@ -60,6 +60,19 @@ export class Pod extends PIXI.Graphics {
         this.tick = null
         this._progress = 1
         this._targetPosition = null
+        this.cpu = new PIXI.Text('CPU', {fontFamily: 'ShareTechMono', fontSize: 10, fill: 0x000000, resolution: 10})
+        this.cpu.scale.x = 8 / this.cpu.width
+        this.cpu.scale.y = 1 / this.cpu.height
+        this.cpu.rotation = Math.PI/2
+        this.cpu.position.x = 2
+        this.cpu.position.y = 1
+
+        this.memory = new PIXI.Text('Memory', {fontFamily: 'ShareTechMono', fontSize: 10, fill: 0x000000, resolution: 10})
+        this.memory.scale.x = 8 / this.memory.width
+        this.memory.scale.y = 1 / this.memory.height
+        this.memory.rotation = Math.PI/2
+        this.memory.position.x = 6
+        this.memory.position.y = 1
 
         if (cluster) {
             ALL_PODS[cluster.cluster.id + '/' + pod.namespace + '/' + pod.name] = this
@@ -71,8 +84,11 @@ export class Pod extends PIXI.Graphics {
             PIXI.ticker.shared.remove(this.tick, this)
         }
         PIXI.ticker.shared.remove(this.animateMove, this)
-        this.clear()
-        super.destroy(options)
+        // work around "Cannot read property 'length' of null" error
+        if (this.graphicsData) {
+            this.clear()
+            super.destroy(options)
+        }
         if (this.cluster) {
             delete ALL_PODS[this.cluster.cluster.id + '/' + this.pod.namespace + '/' + this.pod.name]
         }
@@ -160,7 +176,7 @@ export class Pod extends PIXI.Graphics {
 
     draw() {
 
-        this.children.forEach(child => child.destroy(true))
+        this.children.filter(child => child !== this.cpu && child !== this.memory).forEach(child => child.destroy(true))
         this.removeChildren()
         this.clear()
 
@@ -291,13 +307,7 @@ export class Pod extends PIXI.Graphics {
         }
 
         // CPU
-        const cpu = new PIXI.Text('CPU', {fontFamily: 'ShareTechMono', fontSize: 10, fill: 0x000000, resolution: 10})
-        cpu.scale.x = 8 / cpu.width
-        cpu.scale.y = 1 / cpu.height
-        cpu.rotation = Math.PI/2
-        cpu.position.x = 2
-        cpu.position.y = 1
-        podBox.addChild(cpu)
+        podBox.addChild(this.cpu)
 
         const scaleCpu = resources.cpu.requested <= resources.cpu.limit ? resources.cpu.limit / 8 : resources.cpu.requested / 8
         const scaledCpuReq = resources.cpu.requested !== 0 && scaleCpu !== 0 ? resources.cpu.requested / scaleCpu : 0
@@ -312,13 +322,7 @@ export class Pod extends PIXI.Graphics {
         podBox.endFill()
 
         // Memory
-        const memory = new PIXI.Text('Memory', {fontFamily: 'ShareTechMono', fontSize: 10, fill: 0x000000, resolution: 10})
-        memory.scale.x = 8 / memory.width
-        memory.scale.y = 1 / memory.height
-        memory.rotation = Math.PI/2
-        memory.position.x = 6
-        memory.position.y = 1
-        podBox.addChild(memory)
+        podBox.addChild(this.memory)
 
         const scale = resources.memory.requested <= resources.memory.limit ? resources.memory.limit / 8 : resources.memory.requested / 8
         const scaledMemReq = resources.memory.requested !== 0 && scale !== 0 ? resources.memory.requested / scale : 0
