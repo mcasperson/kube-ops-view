@@ -30,7 +30,7 @@ export default class Button extends PIXI.Graphics
     }
 
     draw() {
-        this.children.forEach(child => child.destroy())
+        this.children.forEach(child => child.destroy(true))
         this.removeChildren()
         this.clear()
 

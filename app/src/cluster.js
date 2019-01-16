@@ -32,11 +32,12 @@ export default class Cluster extends PIXI.Graphics {
         })
     }
 
-    destroy() {
+    destroy(options) {
         if (this.tick) {
             PIXI.ticker.shared.remove(this.tick, this)
         }
-        super.destroy()
+        this.clear()
+        super.destroy(options)
     }
 
     pulsate(_time) {
@@ -45,7 +46,7 @@ export default class Cluster extends PIXI.Graphics {
     }
 
     draw () {
-        this.children.forEach(child => child.destroy())
+        this.children.forEach(child => child.destroy(true))
         this.removeChildren()
         this.clear()
 

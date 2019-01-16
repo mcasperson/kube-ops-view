@@ -16,6 +16,11 @@ export default class Node extends PIXI.Graphics {
         this.nodeMenu = nodeMenu
     }
 
+    destroy(options) {
+        this.clear()
+        super.destroy(options)
+    }
+
     isMaster() {
         for (var key in this.node.labels) {
             if (key == 'node-role.kubernetes.io/master' ||
@@ -67,7 +72,7 @@ export default class Node extends PIXI.Graphics {
     draw() {
         const nodeBox = this
 
-        this.children.forEach(child => child.destroy())
+        this.children.forEach(child => child.destroy(true))
         this.removeChildren()
         this.clear()
 

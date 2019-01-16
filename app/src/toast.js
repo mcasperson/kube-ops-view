@@ -42,7 +42,7 @@ export default class Toast extends PIXI.Graphics
 
     tick() {
         if (new Date().getTime() - this.startTime > TIME_TO_LIVE) {
-            this.destroy()
+            this.destroy(true)
         }
     }
 
@@ -55,7 +55,7 @@ export default class Toast extends PIXI.Graphics
     }
 
     draw() {
-        this.children.forEach(child => child.destroy())
+        this.children.forEach(child => child.destroy(true))
         this.removeChildren()
         this.clear()
 
