@@ -12,14 +12,18 @@ export default class Bars extends PIXI.Graphics {
     }
 
     destroy(options) {
-        this.clear()
-        super.destroy(options)
+        if (this.graphicsData) {
+            this.clear()
+            super.destroy(options)
+        }
     }
 
     draw() {
         this.children.forEach(child => child.destroy(true))
         this.removeChildren()
-        this.clear()
+        if (this.graphicsData) {
+            this.clear()
+        }
 
         const bars = this
 

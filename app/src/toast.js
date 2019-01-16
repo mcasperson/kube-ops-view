@@ -36,8 +36,10 @@ export default class Toast extends PIXI.Graphics
             this.parent.removeChild(this)
         }
         PIXI.ticker.shared.remove(this.tick, this)
-        this.clear()
-        super.destroy(options)
+        if (this.graphicsData) {
+            this.clear()
+            super.destroy(options)
+        }
     }
 
     tick() {
@@ -57,7 +59,9 @@ export default class Toast extends PIXI.Graphics
     draw() {
         this.children.forEach(child => child.destroy(true))
         this.removeChildren()
-        this.clear()
+        if (this.graphicsData) {
+            this.clear()
+        }
 
         const toast = this
 

@@ -23,8 +23,10 @@ export default class SelectBox extends PIXI.Graphics {
     }
 
     destroy(options) {
-        this.clear()
-        super.destroy(options)
+        if (this.graphicsData) {
+            this.clear()
+            super.destroy(options)
+        }
     }
 
     onForwardOver() {
@@ -41,7 +43,6 @@ export default class SelectBox extends PIXI.Graphics {
         if (selectBox.count >= this.items.length) {
             selectBox.count = 0
         }
-        selectBox.text.text = selectBox.items[selectBox.count].text
         this.value = this.items[this.count].value
         this.onchange(this.value)
     }
@@ -60,7 +61,6 @@ export default class SelectBox extends PIXI.Graphics {
         if (selectBox.count < 0) {
             selectBox.count = selectBox.items.length - 1
         }
-        selectBox.text.text = selectBox.items[selectBox.count].text
         this.value = this.items[this.count].value
         this.onchange(this.value)
     }
@@ -70,7 +70,9 @@ export default class SelectBox extends PIXI.Graphics {
             .filter(child => this.textItems.indexOf(child) === -1)
             .forEach(child => child.destroy(true))
         this.removeChildren()
-        this.clear()
+        if (this.graphicsData) {
+            this.clear()
+        }
 
         const selectBox = this
 

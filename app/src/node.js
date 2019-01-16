@@ -17,8 +17,10 @@ export default class Node extends PIXI.Graphics {
     }
 
     destroy(options) {
-        this.clear()
-        super.destroy(options)
+        if (this.graphicsData) {
+            this.clear()
+            super.destroy(options)
+        }
     }
 
     isMaster() {
@@ -74,7 +76,9 @@ export default class Node extends PIXI.Graphics {
 
         this.children.forEach(child => child.destroy(true))
         this.removeChildren()
-        this.clear()
+        if (this.graphicsData) {
+            this.clear()
+        }
 
         const topHandle = new PIXI.Graphics()
         topHandle.beginFill(App.current.theme.primaryColor, 1)

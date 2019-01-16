@@ -18,9 +18,13 @@ export default class Menu extends PIXI.Graphics {
     }
 
     draw() {
-        this.children.forEach(child => child.destroy(true))
+        this.children
+            .filter(child => this.items.indexOf(child) === -1)
+            .forEach(child => child.destroy(true))
         this.removeChildren()
-        this.clear()
+        if (this.graphicsData) {
+            this.clear()
+        }
 
         const that = this
         this.items.reduce((verticalPos, item) => {
@@ -36,11 +40,13 @@ export default class Menu extends PIXI.Graphics {
     }
 
     destroy(options) {
-        this.clear()
         if (this.parent) {
             this.parent.removeChild(this)
         }
-        super.destroy(options)
+        if (this.graphicsData) {
+            this.clear()
+            super.destroy(options)
+        }
         ALL_MENUS.splice(ALL_MENUS.indexOf(this), 1)
     }
 

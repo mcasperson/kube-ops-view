@@ -17,8 +17,10 @@ export default class Button extends PIXI.Graphics
     }
 
     destroy(options) {
-        this.clear()
-        super.destroy(options)
+        if (this.graphicsData) {
+            this.clear()
+            super.destroy(options)
+        }
     }
 
     onBackOver() {
@@ -32,7 +34,9 @@ export default class Button extends PIXI.Graphics
     draw() {
         this.children.forEach(child => child.destroy(true))
         this.removeChildren()
-        this.clear()
+        if (this.graphicsData) {
+            this.clear()
+        }
 
         const button = this
 
