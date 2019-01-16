@@ -7,25 +7,6 @@ export default class SelectBox extends PIXI.Graphics {
         super()
         this.items = items
         this.value = value
-        this.count = 0
-        for (const item of items) {
-            if (item.value == value) {
-                break
-            }
-            this.count++
-        }
-        if (this.count >= items.length) {
-            this.count = 0
-        }
-        this.text = new PIXI.Text(this.items[this.count].text, {
-            fontFamily: 'ShareTechMono',
-            fontSize: 14,
-            fill: App.current.theme.primaryColor,
-            align: 'center'
-        })
-        this.text.x = 10
-        this.text.y = 5
-        this.addChild(this.text)
         this.onchange = onchange
     }
 
@@ -78,6 +59,26 @@ export default class SelectBox extends PIXI.Graphics {
         this.clear()
 
         const selectBox = this
+
+        this.count = 0
+        for (const item of this.items) {
+            if (item.value == this.value) {
+                break
+            }
+            this.count++
+        }
+        if (this.count >= this.items.length) {
+            this.count = 0
+        }
+        const text = new PIXI.Text(this.items[this.count].text, {
+            fontFamily: 'ShareTechMono',
+            fontSize: 14,
+            fill: App.current.theme.primaryColor,
+            align: 'center'
+        })
+        text.x = 10
+        text.y = 5
+        this.addChild(text)
 
         const backArrow = this.backArrow = new PIXI.Graphics()
         const forwardArrow = this.forwardArrow = new PIXI.Graphics()
