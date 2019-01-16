@@ -12,6 +12,11 @@ export default class Tooltip extends PIXI.Graphics {
         this.visible = false
     }
 
+    destroy(options) {
+        this.clear()
+        super.destroy(options)
+    }
+
     setText(text) {
         this.text.text = text
         this.draw()

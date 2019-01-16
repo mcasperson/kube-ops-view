@@ -29,6 +29,11 @@ export default class SelectBox extends PIXI.Graphics {
         this.onchange = onchange
     }
 
+    destroy(options) {
+        this.clear()
+        super.destroy(options)
+    }
+
     onForwardOver() {
         this.forwardArrow.alpha = 0.5
     }

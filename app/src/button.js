@@ -16,6 +16,11 @@ export default class Button extends PIXI.Graphics
         this.fontSize = fontSize || 14
     }
 
+    destroy(options) {
+        this.clear()
+        super.destroy(options)
+    }
+
     onBackOver() {
         this.alpha = 0.5
     }

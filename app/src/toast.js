@@ -31,12 +31,13 @@ export default class Toast extends PIXI.Graphics
         PIXI.ticker.shared.add(this.tick, this)
     }
 
-    destroy() {
+    destroy(options) {
         if (this.parent) {
             this.parent.removeChild(this)
         }
         PIXI.ticker.shared.remove(this.tick, this)
-        super.destroy()
+        this.clear()
+        super.destroy(options)
     }
 
     tick() {

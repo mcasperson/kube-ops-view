@@ -11,6 +11,11 @@ export default class Bars extends PIXI.Graphics {
         this.tooltip = tooltip
     }
 
+    destroy(options) {
+        this.clear()
+        super.destroy(options)
+    }
+
     draw() {
         const bars = this
 

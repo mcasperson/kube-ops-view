@@ -66,12 +66,16 @@ export class Pod extends PIXI.Graphics {
         }
     }
 
-    destroy() {
+    destroy(options) {
         if (this.tick) {
             PIXI.ticker.shared.remove(this.tick, this)
         }
         PIXI.ticker.shared.remove(this.animateMove, this)
-        super.destroy()
+        this.clear()
+        super.destroy(options)
+        if (this.cluster) {
+            delete ALL_PODS[this.cluster.cluster.id + '/' + this.pod.namespace + '/' + this.pod.name]
+        }
     }
 
     animateMove(time) {
@@ -155,6 +159,9 @@ export class Pod extends PIXI.Graphics {
     }
 
     draw() {
+
+        this.clear()
+        this.removeChildren()
 
         let ready = 0
         let running = 0

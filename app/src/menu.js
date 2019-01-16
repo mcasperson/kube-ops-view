@@ -33,11 +33,12 @@ export default class Menu extends PIXI.Graphics {
         this.drawRect(0, 0, this.width + MENU_HORIZONTAL_PADDING, this.height + MENU_VERTICAL_PADDING)
     }
 
-    destroy() {
-        super.destroy()
+    destroy(options) {
+        this.clear()
         if (this.parent) {
             this.parent.removeChild(this)
         }
+        super.destroy(options)
         ALL_MENUS.splice(ALL_MENUS.indexOf(this), 1)
     }
 

@@ -66,6 +66,10 @@ export default class Node extends PIXI.Graphics {
 
     draw() {
         const nodeBox = this
+
+        this.clear()
+        this.removeChildren()
+
         const topHandle = new PIXI.Graphics()
         topHandle.beginFill(App.current.theme.primaryColor, 1)
         topHandle.drawRect(0, 0, 105, 15)

@@ -414,7 +414,7 @@ export default class App {
     drawOverlay() {
         if (this.overlayOptions) {
             this.menuBar.removeChild(this.overlayOptions)
-            this.overlayOptions.destroy()
+            this.overlayOptions.destroy(true)
         }
 
         this.overlayItems = Array.from(this.clusters.entries())
@@ -750,7 +750,7 @@ export default class App {
             if (progress >= 1) {
                 PIXI.ticker.shared.remove(tick)
                 that.stage.removeChild(pod)
-                pod.destroy()
+                pod.destroy(true)
                 originalPod.visible = true
             }
         }
@@ -768,7 +768,7 @@ export default class App {
         pod.position = globalPosition.clone()
         pod.alpha = 1
         pod._progress = 1
-        originalPod.destroy()
+        originalPod.destroy(true)
         const that = this
         const tick = function (t) {
             // progress goes from 1 to 0
@@ -782,7 +782,7 @@ export default class App {
             if (progress <= 0) {
                 PIXI.ticker.shared.remove(tick)
                 that.stage.removeChild(pod)
-                pod.destroy()
+                pod.destroy(true)
             }
         }
         PIXI.ticker.shared.add(tick)
@@ -807,6 +807,7 @@ export default class App {
                 podKeys.add(cluster.id + '/' + pod.namespace + '/' + pod.name)
             }
         }
+
         for (const key of Object.keys(ALL_PODS)) {
             const pod = ALL_PODS[key]
             if (!podKeys.has(key)) {
@@ -821,15 +822,17 @@ export default class App {
                         that.animatePodDeletion(pod, globalPos)
                     }, 100 * changes)
                 } else {
-                    pod.destroy()
+                    pod.destroy(true)
                 }
                 changes++
             }
         }
+
         const clusterComponentById = {}
         for (const component of this.viewContainer.children) {
             clusterComponentById[component.cluster.id] = component
         }
+
         let y = 0
         const clusterIds = new Set()
         for (const cluster of clusters) {
@@ -857,6 +860,7 @@ export default class App {
                 y += clusterBox.height + 10
             }
         }
+
         for (const component of this.viewContainer.children) {
             if (!clusterIds.has(component.cluster.id)) {
                 this.viewContainer.removeChild(component)
