@@ -10,7 +10,7 @@ const NODE_ZOOM = 4
  * How long to wait for fresh data from the server before considering the information old
  * @type {number}
  */
-const MAX_DATA_AGE = 60
+const MAX_DATA_AGE = 120
 
 export default class Cluster extends PIXI.Graphics {
     constructor (cluster, status, tooltip, menu, nodeMenu, clusterMenu, zoomInto) {

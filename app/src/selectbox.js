@@ -45,6 +45,7 @@ export default class SelectBox extends PIXI.Graphics {
         }
         this.value = this.items[this.count].value
         this.onchange(this.value)
+        this.draw()
     }
 
     onBackOver() {
@@ -63,6 +64,7 @@ export default class SelectBox extends PIXI.Graphics {
         }
         this.value = this.items[this.count].value
         this.onchange(this.value)
+        this.draw()
     }
 
     draw() {
