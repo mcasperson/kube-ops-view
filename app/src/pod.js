@@ -47,6 +47,8 @@ const sortByCPU = (a, b) => {
     return bCpu - aCpu
 }
 
+const COUCH_DB_RESULTS = {}
+
 export {ALL_PODS, sortByAge, sortByCPU, sortByMemory, sortByName}
 
 export class Pod extends PIXI.Graphics {
@@ -510,6 +512,8 @@ export class Pod extends PIXI.Graphics {
             return this.standardPodSummary(allReady, allRunning)
         }
 
+        this.resolveExternalData(field)
+
         if (this.allMetadataIsNumeric(field)) {
             return this.numericPodSummary(field)
         }
@@ -523,6 +527,74 @@ export class Pod extends PIXI.Graphics {
         }
 
         return this.genericPodSummary(field)
+    }
+
+    resolveExternalData(field) {
+        try {
+            if (this.pod.kovmetadata[field + '.meta']) {
+                const metaJson = JSON.parse(this.pod.kovmetadata[field + '.meta'])
+                if (metaJson.source === 'url') {
+                    this.resolveUrl(field, metaJson)
+                } else if (metaJson.source === 'couchdb') {
+                    this.resolveCouchdb(field, metaJson)
+                }
+            }
+        } catch (e) {
+            /* eslint-disable no-console */
+            console.log(e)
+            /* eslint-enable no-console */
+
+            this.pod.kovmetadata[field] = ''
+        }
+    }
+
+    resolveCouchdb(field, metaJson) {
+        const resultTTL = metaJson.resultTTL || 60
+        const now = Math.round((new Date()).getTime() / 1000)
+        if (!COUCH_DB_RESULTS[metaJson.sourceUrl] || COUCH_DB_RESULTS[metaJson.sourceUrl].timestamp < now - resultTTL) {
+            const request = new XMLHttpRequest()
+            request.open('GET', metaJson.sourceUrl + '/_all_docs?include_docs=true', false)
+            if (metaJson.auth === 'basic') {
+                request.withCredentials = true
+                request.setRequestHeader('Authorization', 'Basic ' + btoa(metaJson.username + ':' + metaJson.password))
+            }
+            request.send(null)
+
+            if (request.status === 200) {
+                COUCH_DB_RESULTS[metaJson.sourceUrl] = {timestamp: now, value: JSON.parse(request.responseText)}
+            }
+        }
+
+        if (COUCH_DB_RESULTS[metaJson.sourceUrl]) {
+            const value = COUCH_DB_RESULTS[metaJson.sourceUrl].value.rows
+                .filter(row => row.id === metaJson.documentId)
+                .map(row => row.doc[metaJson.jsonField])
+
+            this.pod.kovmetadata[field] = value && value[0] || ''
+        } else {
+            this.pod.kovmetadata[field] = ''
+        }
+    }
+
+    resolveUrl(field, metaJson) {
+        const request = new XMLHttpRequest()
+        request.open('GET', metaJson.sourceUrl, false)
+        if (metaJson.auth === 'basic') {
+            request.withCredentials = true
+            request.setRequestHeader('Authorization', 'Basic ' + btoa(metaJson.username + ':' + metaJson.password))
+        }
+        request.send(null)
+
+        if (request.status === 200) {
+            if (metaJson.format === 'json' && metaJson.jsonField) {
+                const resultJson = JSON.parse(request.responseText)
+                this.pod.kovmetadata[field] = resultJson[metaJson.jsonField]
+            } else {
+                this.pod.kovmetadata[field] = request.responseText
+            }
+        } else {
+            this.pod.kovmetadata[field] = ''
+        }
     }
 
     /**
