@@ -560,9 +560,7 @@ export class Pod extends PIXI.Graphics {
             }
             request.send(null)
 
-            if (request.status === 200) {
-                COUCH_DB_RESULTS[metaJson.sourceUrl] = {timestamp: now, value: JSON.parse(request.responseText)}
-            }
+            COUCH_DB_RESULTS[metaJson.sourceUrl] = {timestamp: now, value: request.status === 200 ? JSON.parse(request.responseText) : {}}
         }
 
         if (COUCH_DB_RESULTS[metaJson.sourceUrl]) {
