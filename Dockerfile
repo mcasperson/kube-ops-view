@@ -26,4 +26,4 @@ COPY kube_ops_view /kube_ops_view
 ARG VERSION=dev
 RUN sed -i "s/__version__ = .*/__version__ = '${VERSION}'/" /kube_ops_view/__init__.py
 
-ENTRYPOINT ["/usr/local/bin/python", "-m", "kube_ops_view"]
+ENTRYPOINT ["/usr/local/bin/python", "-m", "kube_ops_view", "--query-interval", "60"]
