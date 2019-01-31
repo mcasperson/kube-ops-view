@@ -26,7 +26,6 @@ export default class Toast extends PIXI.Graphics
         })
         this.text.x = TOAST_HORIZONTAL_PADDING
         this.text.y = TOAST_VERTICAL_PADDING
-        this.addChild(this.text)
 
         PIXI.ticker.shared.add(this.tick, this)
     }
@@ -64,6 +63,8 @@ export default class Toast extends PIXI.Graphics
         }
 
         const toast = this
+
+        toast.addChild(this.text)
 
         // FIXME: hardcoded value for average char width..
         const textBoxWidth = TOAST_HORIZONTAL_PADDING + 8 * this.value.length

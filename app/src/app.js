@@ -570,6 +570,10 @@ export default class App {
                         'Get Node',
                         that.copyCommandToClipboard(
                             () => 'kubectl get node ' + Node.selected.name))
+                    .addButton(
+                        'Get Node Pods',
+                        that.copyCommandToClipboard(
+                            () => 'kubectl get pods --all-namespaces --no-headers --field-selector spec.nodeName=' + Node.selected.name))
             })
             .addSubMenu('Describe >', function(subMenu) {
                 subMenu
