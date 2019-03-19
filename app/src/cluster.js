@@ -114,13 +114,9 @@ export default class Cluster extends PIXI.Graphics {
             nodeBox.y += masterHeight
         }
 
-        if (masterX === left) {
-            masterX = workerX
-        }
-
         /*
-            Place unassigned pods to the left of the master nodes, or
-            to the left of the worker nodes if there were no masters.
+            Place unassigned pods to the right of the master nodes, or
+            to the right of the worker nodes if there were no masters.
          */
         var unassignedX = masterX === left ? workerX : masterX
 
@@ -132,7 +128,7 @@ export default class Cluster extends PIXI.Graphics {
             this.addChild(podBox)
             unassignedX += 20
         }
-        masterWidth = Math.max(masterX, masterWidth)
+        masterWidth = Math.max(unassignedX, masterWidth)
         workerWidth = Math.max(workerX, workerWidth)
 
         this.lineStyle(2, App.current.theme.primaryColor, 1)
